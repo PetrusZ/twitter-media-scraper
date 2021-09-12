@@ -65,9 +65,11 @@ func getUserTweets(user string, amount int) {
         }
 
         if *getPhotos {
-            for id, photo := range tweet.Photos {
-                date := fmt.Sprintf("%d%02d%02d", tweet.TimeParsed.Year(), tweet.TimeParsed.Month(), tweet.TimeParsed.Day())
-                downloadFile(user, photo, date + " - " + tweet.ID + "-" + fmt.Sprint(id))
+            if tweet.Videos == nil {
+                for id, photo := range tweet.Photos {
+                    date := fmt.Sprintf("%d%02d%02d", tweet.TimeParsed.Year(), tweet.TimeParsed.Month(), tweet.TimeParsed.Day())
+                    downloadFile(user, photo, date + " - " + tweet.ID + "-" + fmt.Sprint(id))
+                }
             }
         }
     }
