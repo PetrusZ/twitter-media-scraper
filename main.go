@@ -15,7 +15,7 @@ import (
 )
 
 var  (
-    twitterUser = flag.String("user", "xiaoxiaoxin", "the twitter user to get files from")
+    twitterUser = flag.String("user", "", "the twitter user to get files from")
     tweetAmount = flag.Int("amount", 1000, "amount of tweets to get content from")
     getVideos = flag.Bool("videos", true, "download videos from tweets")
     getPhotos = flag.Bool("photos", true, "download photos from tweets")
@@ -39,6 +39,7 @@ func getUserTweets(user string, amount int) {
 
         if err != nil {
             fmt.Println("Mkdir error: ", err)
+            panic(err)
         }
     }
 
