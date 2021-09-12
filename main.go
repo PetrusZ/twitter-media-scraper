@@ -22,9 +22,10 @@ var  (
 )
 
 func main() {
-
     if *twitterUser != "" {
         getUserTweets(*twitterUser, *tweetAmount)
+    } else {
+        fmt.Println("No twitter user")
     }
 }
 
@@ -44,18 +45,14 @@ func getUserTweets(user string, amount int) {
     }
 
     for tweet := range scraper.GetTweets(context.Background(), user, amount) {
-        // fmt.Println("found tweet, id: ", tweet.ID)
         if tweet.Error != nil {
             panic(tweet.Error)
         }
 
         url := "https://twitter.com/" + user + "/status/" + tweet.ID
 
-
         if *getVideos {
             if tweet.Videos != nil {
-                // fmt.Println("found video tweet, url: ", url)
-
                 arg := user + "/%(upload_date)s - %(id)s.%(ext)s"
 
                 cmd := exec.Command("youtube-dl", "-o", arg, url)
@@ -68,9 +65,9 @@ func getUserTweets(user string, amount int) {
         }
 
         if *getPhotos {
-            for _, photo := range tweet.Photos {
+            for id, photo := range tweet.Photos {
                 date := fmt.Sprintf("%d%02d%02d", tweet.TimeParsed.Year(), tweet.TimeParsed.Month(), tweet.TimeParsed.Day())
-                downloadFile(user, photo, tweet.ID + " - " + date)
+                downloadFile(user, photo, date + " - " + tweet.ID + "-" + fmt.Sprint(id))
             }
         }
     }
@@ -88,7 +85,7 @@ func downloadFile(dir, fileUrl, name string) error {
         return err
     }
 
-    f, err := os.Create(dir + "/" + name + "." + path.Ext(parsedUrl.Path))
+    f, err := os.Create(dir + "/" + name + path.Ext(parsedUrl.Path))
     if err != nil {
         return err
     }
