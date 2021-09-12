@@ -29,24 +29,22 @@ func main() {
     }
 }
 
-func getUserTweets(user string, amount int) {
+func getUserTweets(user string, amount int) (err error) {
     scraper := twitterscraper.New()
 
 
-    _, err := os.Stat(user)
+    tweets := scraper.GetTweets(context.Background(), user, amount)
 
-    if err != nil {
-        err := os.Mkdir(user, os.ModePerm)
-
+    if tweets == nil {
+        err = mkdir(user)
         if err != nil {
-            fmt.Println("Mkdir error: ", err)
-            panic(err)
+            return err
         }
     }
 
-    for tweet := range scraper.GetTweets(context.Background(), user, amount) {
+    for tweet := range  tweets {
         if tweet.Error != nil {
-            panic(tweet.Error)
+            return tweet.Error
         }
 
         url := "https://twitter.com/" + user + "/status/" + tweet.ID
@@ -60,6 +58,7 @@ func getUserTweets(user string, amount int) {
                 if err != nil {
                     fmt.Println("cmd error: ", err.Error())
                     fmt.Println(cmd.String())
+                    return err
                 }
             }
         }
@@ -73,6 +72,8 @@ func getUserTweets(user string, amount int) {
             }
         }
     }
+
+    return err
 }
 
 func downloadFile(dir, fileUrl, name string) error {
@@ -87,6 +88,11 @@ func downloadFile(dir, fileUrl, name string) error {
         return err
     }
 
+    err = mkdir(dir)
+    if err != nil {
+        return err
+    }
+
     f, err := os.Create(dir + "/" + name + path.Ext(parsedUrl.Path))
     if err != nil {
         return err
@@ -95,4 +101,17 @@ func downloadFile(dir, fileUrl, name string) error {
 
     _, err = io.Copy(f, resp.Body)
     return err
+}
+
+func mkdir(dir string) error {
+    _, err := os.Stat(dir)
+
+    if err != nil {
+        err := os.Mkdir(dir, os.ModePerm)
+
+        if err != nil {
+            return err
+        }
+    }
+    return nil
 }
