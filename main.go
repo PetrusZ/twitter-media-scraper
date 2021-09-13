@@ -21,6 +21,8 @@ func main() {
         panic(err)
     }
 
+    d := GetDownloaderInstance()
+
     for _, config := range configFile.Configs {
         twitterUser = config.UserName
         tweetAmount = config.TweetAmount
@@ -28,14 +30,16 @@ func main() {
         getPhotos = config.GetPhotos
 
         if twitterUser != "" {
-            getUserTweets(twitterUser, tweetAmount)
+            getUserTweets(twitterUser, tweetAmount, d)
         } else {
             fmt.Println("No twitter user")
         }
     }
+
+    d.Wait()
 }
 
-func getUserTweets(user string, amount int) (err error) {
+func getUserTweets(user string, amount int, d *downloader) (err error) {
     scraper := twitterscraper.New()
     tweets := scraper.GetTweets(context.Background(), user, amount)
 
@@ -45,8 +49,6 @@ func getUserTweets(user string, amount int) (err error) {
             return err
         }
     }
-
-    d := GetDownloaderInstance()
 
     for tweet := range tweets {
         if tweet.Error != nil {
@@ -72,8 +74,6 @@ func getUserTweets(user string, amount int) (err error) {
             }
         }
     }
-
-    d.Wait()
 
     return err
 }

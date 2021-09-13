@@ -133,8 +133,9 @@ func  TestGetUserTweets(t *testing.T) {
 
     getPhotos = true
     getVideos = true
+    d := GetDownloaderInstance()
     for _, tt := range tests {
-        actual := getUserTweets(tt.user, tt.amount)
+        actual := getUserTweets(tt.user, tt.amount, d)
         if  !(tt.expected == true  && actual == nil) && !(tt.expected == false  && actual != nil) {
             t.Errorf("getUserTweets(%s, %d: err = %s, expected %s", tt.user, tt.amount, actual, convertBoolToString(tt.expected))
         }
