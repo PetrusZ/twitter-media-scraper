@@ -8,4 +8,4 @@ Scrape/Craw twitter user's pictures and videos by username.
 
 # TODO
 
-* add config file
+* add Makefile

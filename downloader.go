@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -32,20 +33,25 @@ type downloader struct {
 
 func (d *downloader) Start (count int) {
     for i := 0; i < count; i++ {
-        // workerId := i
+        workerId := i
         go func() {
             // log.Printf("workerId %d start\n", workerId)
 
-            // info := <-d.info
             for info := range d.info {
                 d.wg.Add(1)
 
                 // log.Printf("workerId %d got tweetInfo: dir %s, name %s, url %s\n", workerId, info.dir, info.name, info.url)
 
+                var err error
                 if info.tweetType == Video {
-                    d.downloadVideo(info.dir, info.url)
+                    err = d.downloadVideo(info.dir, info.url)
                 } else if info.tweetType == Photo {
-                    d.downloadFile(info.dir, info.name, info.url + "?format=jpg&name=orig")
+                    err = d.downloadFile(info.dir, info.name, info.url + "?format=jpg&name=orig")
+                }
+
+                if err != nil {
+                    log.Printf("workerId %d got tweetInfo: dir %s, name %s, url %s\n", workerId, info.dir, info.name, info.url)
+                    log.Printf("Error: %s", err)
                 }
 
                 d.wg.Done()

@@ -2,22 +2,32 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 
 	twitterscraper "github.com/n0madic/twitter-scraper"
 )
 
 var  (
-    twitterUser = flag.String("user", "", "the twitter user to get files from")
-    tweetAmount = flag.Int("amount", 1000, "amount of tweets to get content from")
-    getVideos = flag.Bool("videos", true, "download videos from tweets")
-    getPhotos = flag.Bool("photos", true, "download photos from tweets")
+    twitterUser string
+    tweetAmount int
+    getVideos bool
+    getPhotos bool
 )
 
 func main() {
-    if *twitterUser != "" {
-        getUserTweets(*twitterUser, *tweetAmount)
+    configFile := NewConfigFile()
+    err := configFile.Load("config.json")
+    if err != nil {
+        panic(err)
+    }
+
+    twitterUser = configFile.config.UserName
+    tweetAmount = configFile.config.TweetAmount
+    getVideos = configFile.config.GetVideos
+    getPhotos = configFile.config.GetPhotos
+
+    if twitterUser != "" {
+        getUserTweets(twitterUser, tweetAmount)
     } else {
         fmt.Println("No twitter user")
     }
@@ -46,14 +56,14 @@ func getUserTweets(user string, amount int) (err error) {
 
         url := "https://twitter.com/" + user + "/status/" + tweet.ID
 
-        if *getVideos {
+        if getVideos {
             if tweet.Videos != nil {
                 tweetInfo := tweetInfo{user, "", url, Video}
                 d.info <- tweetInfo
             }
         }
 
-        if *getPhotos {
+        if getPhotos {
             if tweet.Videos == nil {
                 for id, url := range tweet.Photos {
                     date := fmt.Sprintf("%d%02d%02d", tweet.TimeParsed.Year(), tweet.TimeParsed.Month(), tweet.TimeParsed.Day())
