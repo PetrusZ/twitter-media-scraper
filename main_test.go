@@ -29,6 +29,31 @@ func TestMkdir(t *testing.T) {
     }
 }
 
+
+func TestMkdirAll(t *testing.T) {
+    var tests = []struct {
+        dir string
+        expected bool
+    }{
+        {"123", true},
+        {" /f213/", true},
+        {"  ", true},
+        {"", true},
+        {"1/a/b", true},
+        {"1/a/b/c", true},
+        {"1/a/b/c/d", true},
+        {"1/a/b/c/d/e", true},
+    }
+
+    mkdir(test_dir)
+    for _, tt := range tests {
+        actual := mkdirAll(test_dir + "/" + tt.dir)
+        if  !(tt.expected == true  && actual == nil) && !(tt.expected == false  && actual != nil) {
+            t.Errorf("mkdir(%s): err = %s, expected %s", tt.dir, actual, convertBoolToString(tt.expected))
+        }
+    }
+}
+
 func TestDownloadFile(t *testing.T) {
     var tests = []struct {
         dir string
@@ -106,6 +131,8 @@ func  TestGetUserTweets(t *testing.T) {
         {"", 50, false},
     }
 
+    getPhotos = true
+    getVideos = true
     for _, tt := range tests {
         actual := getUserTweets(tt.user, tt.amount)
         if  !(tt.expected == true  && actual == nil) && !(tt.expected == false  && actual != nil) {

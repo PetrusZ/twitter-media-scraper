@@ -44,9 +44,9 @@ func (d *downloader) Start (count int) {
 
                 var err error
                 if info.tweetType == Video {
-                    err = d.downloadVideo(info.dir, info.url)
+                    err = d.downloadVideo("out/" + info.dir, info.url)
                 } else if info.tweetType == Photo {
-                    err = d.downloadFile(info.dir, info.name, info.url + "?format=jpg&name=orig")
+                    err = d.downloadFile("out/" + info.dir, info.name, info.url + "?format=jpg&name=orig")
                 }
 
                 if err != nil {
@@ -92,7 +92,7 @@ func (d *downloader) downloadFile(dir, name, downloadUrl string) error {
         return err
     }
 
-    err = mkdir(dir)
+    err = mkdirAll(dir + "/")
     if err != nil {
         return err
     }

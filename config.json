@@ -1,6 +1,14 @@
-{
-    "user_name": "",
-    "tweet_amount": 1000,
-    "get_videos": true,
-    "get_photos": true
-}
+[
+    {
+        "user_name": "",
+        "tweet_amount": 1000,
+        "get_videos": true,
+        "get_photos": true
+    },
+    {
+        "user_name": "",
+        "tweet_amount": 1000,
+        "get_videos": true,
+        "get_photos": true
+    }
+]

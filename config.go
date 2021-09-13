@@ -8,7 +8,7 @@ import (
 
 type ConfigFile struct {
     fileName string
-    Config Config
+    Configs []Config
 }
 
 type Config struct {
@@ -35,7 +35,7 @@ func (c *ConfigFile) Load(name string) error {
         return err
     }
 
-    err = json.Unmarshal(byteValue, &c.Config)
+    err = json.Unmarshal(byteValue, &c.Configs)
     if err != nil {
         return err
     }

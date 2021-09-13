@@ -21,15 +21,17 @@ func main() {
         panic(err)
     }
 
-    twitterUser = configFile.Config.UserName
-    tweetAmount = configFile.Config.TweetAmount
-    getVideos = configFile.Config.GetVideos
-    getPhotos = configFile.Config.GetPhotos
+    for _, config := range configFile.Configs {
+        twitterUser = config.UserName
+        tweetAmount = config.TweetAmount
+        getVideos = config.GetVideos
+        getPhotos = config.GetPhotos
 
-    if twitterUser != "" {
-        getUserTweets(twitterUser, tweetAmount)
-    } else {
-        fmt.Println("No twitter user")
+        if twitterUser != "" {
+            getUserTweets(twitterUser, tweetAmount)
+        } else {
+            fmt.Println("No twitter user")
+        }
     }
 }
 
@@ -40,7 +42,7 @@ func getUserTweets(user string, amount int) (err error) {
     tweets := scraper.GetTweets(context.Background(), user, amount)
 
     if tweets == nil {
-        err = mkdir(user)
+        err = mkdirAll("out/" + user + "/")
         if err != nil {
             return err
         }
