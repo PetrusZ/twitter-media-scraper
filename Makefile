@@ -1,16 +1,20 @@
 .PHONY: run build clean
 
+SOURCE = main.go downloader.go utils.go config.go
+
+TEMP = BBCWorld test
+
 run:
-	go run ./main.go ./downloader.go ./utils.go ./config.go
+	go run $(SOURCE)
 
 build:
-	go build -o twitter_scraper ./main.go ./downloader.go ./utils.go ./config.go
+	go build -o twitter_scraper $(SOURCE)
 
 test:
 	go test
 
 clean:
-	rm -rf BBCWorld test
+	rm -rf $(TEMP)
 
-clean_all:
-	rm -rf BBCWorld test twitter_scraper
+cleanall:
+	rm -rf $(TEMP) twitter_scraper
