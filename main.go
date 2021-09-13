@@ -37,8 +37,6 @@ func main() {
 
 func getUserTweets(user string, amount int) (err error) {
     scraper := twitterscraper.New()
-
-
     tweets := scraper.GetTweets(context.Background(), user, amount)
 
     if tweets == nil {
@@ -50,7 +48,7 @@ func getUserTweets(user string, amount int) (err error) {
 
     d := GetDownloaderInstance()
 
-    for tweet := range  tweets {
+    for tweet := range tweets {
         if tweet.Error != nil {
             return tweet.Error
         }

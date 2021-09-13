@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"path"
 	"sync"
+	"time"
 )
 
 var downloaderInstance *downloader
@@ -43,6 +44,9 @@ func GetDownloaderInstance() *downloader {
 }
 
 func (d *downloader) Start (count int) {
+    // wait for producer a liite bit
+    time.Sleep(3 * time.Second)
+
     for i := 0; i < count; i++ {
         workerId := i
         go func() {
