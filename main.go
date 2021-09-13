@@ -21,10 +21,10 @@ func main() {
         panic(err)
     }
 
-    twitterUser = configFile.config.UserName
-    tweetAmount = configFile.config.TweetAmount
-    getVideos = configFile.config.GetVideos
-    getPhotos = configFile.config.GetPhotos
+    twitterUser = configFile.Config.UserName
+    tweetAmount = configFile.Config.TweetAmount
+    getVideos = configFile.Config.GetVideos
+    getPhotos = configFile.Config.GetPhotos
 
     if twitterUser != "" {
         getUserTweets(twitterUser, tweetAmount)
