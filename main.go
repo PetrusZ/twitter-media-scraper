@@ -48,8 +48,7 @@ func getUserTweets(user string, amount int) (err error) {
         }
     }
 
-    d := &downloader{info: make(chan tweetInfo)}
-    d.Start(16)
+    d := GetDownloaderInstance()
 
     for tweet := range  tweets {
         if tweet.Error != nil {
@@ -76,7 +75,6 @@ func getUserTweets(user string, amount int) (err error) {
         }
     }
 
-    close(d.info)
     d.Wait()
 
     return err

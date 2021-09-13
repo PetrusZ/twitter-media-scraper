@@ -12,6 +12,9 @@ import (
 	"sync"
 )
 
+var downloaderInstance *downloader
+var once sync.Once
+
 type tweetType int
 
 const (
@@ -29,6 +32,14 @@ type tweetInfo struct {
 type downloader struct {
     info chan tweetInfo
     wg sync.WaitGroup
+}
+
+func GetDownloaderInstance() *downloader {
+    once.Do(func() {
+        downloaderInstance = &downloader{info: make(chan tweetInfo)}
+        downloaderInstance.Start(16)
+    })
+    return downloaderInstance
 }
 
 func (d *downloader) Start (count int) {
