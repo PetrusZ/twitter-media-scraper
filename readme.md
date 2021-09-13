@@ -8,5 +8,5 @@ Scrape/Craw twitter user's pictures and videos by username.
 
 # Usage
 
-* Edit =config.json=
-* =make run=
+1. Edit `config.json`
+2. `make run`
