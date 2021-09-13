@@ -6,6 +6,7 @@ Scrape/Craw twitter user's pictures and videos by username.
 
 * [youtube-dl](https://github.com/ytdl-org/youtube-dl/) for downloading videos
 
-# TODO
+# Usage
 
-* add Makefile
+* Edit =config.json=
+* =make run=
