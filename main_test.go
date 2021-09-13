@@ -29,8 +29,8 @@ func TestMkdir(t *testing.T) {
 func TestDownloadFile(t *testing.T) {
     var tests = []struct {
         dir string
-        fileUrl string
         name string
+        fileUrl string
         expected bool
     }{
         {"", "https://www.baidu.com", "https_index", true},
@@ -41,8 +41,35 @@ func TestDownloadFile(t *testing.T) {
         {"baidu", "http://www.baidu.co", "index", false},
     }
 
+    d := downloader{}
     for _, tt := range tests {
-        actual := downloadFile(test_dir + "/" + tt.dir, tt.fileUrl, tt.name)
+        actual := d.downloadFile(test_dir + "/" + tt.dir, tt.fileUrl, tt.name)
+        if  !(tt.expected == true  && actual == nil) && !(tt.expected == false  && actual != nil) {
+            t.Errorf("downloadFile(%s, %s, %s): err = %s, expected %s", tt.dir, tt.fileUrl, tt.name, actual, convertBoolToString(tt.expected))
+        }
+    }
+}
+
+func TestParallelDownloadFile(t *testing.T) {
+    var tests = []struct {
+        dir string
+        name string
+        fileUrl string
+        expected bool
+    }{
+        {"Paralle", "https://t1.huishahe.com/uploads/tu/zyf/tt/20160520/erx0a4ooid2.jpg", "bigPic1.jpg", true},
+        {"Paralle", "https://t1.huishahe.com/uploads/tu/zyf/tt/20160520/erx0a4ooid2.jpg", "bigPic2.jpg", true},
+        {"Paralle", "https://t1.huishahe.com/uploads/tu/zyf/tt/20160520/erx0a4ooid2.jpg", "bigPic3.jpg", true},
+        {"Paralle", "https://t1.huishahe.com/uploads/tu/zyf/tt/20160520/erx0a4ooid2.jpg", "bigPic4.jpg", true},
+        {"Paralle", "https://t1.huishahe.com/uploads/tu/zyf/tt/20160520/erx0a4ooid2.jpg", "bigPic5.jpg", true},
+        {"Paralle", "https://t1.huishahe.com/uploads/tu/zyf/tt/20160520/erx0a4ooid2.jpg", "bigPic6.jpg", true},
+        {"Paralle", "https://t1.huishahe.com/uploads/tu/zyf/tt/20160520/erx0a4ooid2.jpg", "bigPic7.jpg", true},
+        {"Paralle", "https://t1.huishahe.com/uploads/tu/zyf/tt/20160520/erx0a4ooid2.jpg", "bigPic8.jpg", true},
+    }
+
+    d := downloader{}
+    for _, tt := range tests {
+        actual := d.downloadFile(test_dir + "/" + tt.dir, tt.fileUrl, tt.name)
         if  !(tt.expected == true  && actual == nil) && !(tt.expected == false  && actual != nil) {
             t.Errorf("downloadFile(%s, %s, %s): err = %s, expected %s", tt.dir, tt.fileUrl, tt.name, actual, convertBoolToString(tt.expected))
         }
@@ -55,10 +82,10 @@ func  TestGetUserTweets(t *testing.T) {
         amount int
         expected bool
     }{
-        {"128j122js,.xzdmcvwe", 2, false},
-        {"BBCWorld", 20, true},
+        {"128j122js,.xzdmcvwe", 50, false},
+        {"BBCWorld", 50, true},
         {"BBCWorld", 0, true},
-        {"", 2, false},
+        {"", 50, false},
     }
 
     for _, tt := range tests {

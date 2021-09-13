@@ -1,6 +1,6 @@
 # Intro
 
-Scrape/Craw twitter user's picture and video by username.
+Scrape/Craw twitter user's pictures and videos by username.
 
 # Requirements
 
@@ -8,4 +8,4 @@ Scrape/Craw twitter user's picture and video by username.
 
 # TODO
 
-* add multiple threads
+* add config file
