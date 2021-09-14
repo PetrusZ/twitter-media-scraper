@@ -18,102 +18,102 @@ var once sync.Once
 type tweetType int
 
 const (
-    Photo tweetType = iota
-    Video
+	Photo tweetType = iota
+	Video
 )
 
 type tweetInfo struct {
-    dir string
-    name string
-    url string
-    tweetType tweetType
+	dir       string
+	name      string
+	url       string
+	tweetType tweetType
 }
 
 type downloader struct {
-    info chan tweetInfo
-    wg sync.WaitGroup
+	info chan tweetInfo
+	wg   sync.WaitGroup
 }
 
 func GetDownloaderInstance() *downloader {
-    once.Do(func() {
-        downloaderInstance = &downloader{info: make(chan tweetInfo)}
-        downloaderInstance.Start(16)
-    })
-    return downloaderInstance
+	once.Do(func() {
+		downloaderInstance = &downloader{info: make(chan tweetInfo)}
+		downloaderInstance.Start(16)
+	})
+	return downloaderInstance
 }
 
-func (d *downloader) Start (count int) {
-    for i := 0; i < count; i++ {
-        workerId := i
-        go func() {
-            // log.Printf("workerId %d start\n", workerId)
+func (d *downloader) Start(count int) {
+	for i := 0; i < count; i++ {
+		workerID := i
+		go func() {
+			// log.Printf("workerId %d start\n", workerId)
 
-            for info := range d.info {
-                d.wg.Add(1)
+			for info := range d.info {
+				d.wg.Add(1)
 
-                // log.Printf("workerId %d got tweetInfo: dir %s, name %s, url %s\n", workerId, info.dir, info.name, info.url)
+				// log.Printf("workerId %d got tweetInfo: dir %s, name %s, url %s\n", workerId, info.dir, info.name, info.url)
 
-                var err error
-                if info.tweetType == Video {
-                    err = d.downloadVideo("out/" + info.dir, info.url)
-                } else if info.tweetType == Photo {
-                    err = d.downloadFile("out/" + info.dir, info.name, info.url + "?format=jpg&name=orig")
-                }
+				var err error
+				if info.tweetType == Video {
+					err = d.downloadVideo("out/"+info.dir, info.url)
+				} else if info.tweetType == Photo {
+					err = d.downloadFile("out/"+info.dir, info.name, info.url+"?format=jpg&name=orig")
+				}
 
-                if err != nil {
-                    log.Printf("workerId %d got tweetInfo: dir %s, name %s, url %s\n", workerId, info.dir, info.name, info.url)
-                    log.Printf("Error: %s", err)
-                }
+				if err != nil {
+					log.Printf("workerId %d got tweetInfo: dir %s, name %s, url %s\n", workerID, info.dir, info.name, info.url)
+					log.Printf("Error: %s", err)
+				}
 
-                d.wg.Done()
-            }
-            // log.Printf("workerId %d end\n", workerId)
-        }()
-    }
+				d.wg.Done()
+			}
+			// log.Printf("workerId %d end\n", workerId)
+		}()
+	}
 }
 
-func (d *downloader) Wait(){
-    d.wg.Wait()
+func (d *downloader) Wait() {
+	d.wg.Wait()
 }
 
 func (d *downloader) downloadVideo(dir, url string) error {
 
-    arg := dir + "/%(upload_date)s - %(id)s.%(ext)s"
+	arg := dir + "/%(upload_date)s - %(id)s.%(ext)s"
 
-    cmd := exec.Command("youtube-dl", "-o", arg, url)
-    err := cmd.Run()
-    if err != nil {
-        fmt.Println("cmd error: ", err.Error())
-        fmt.Println(cmd.String())
-        return err
-    }
+	cmd := exec.Command("youtube-dl", "-o", arg, url)
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println("cmd error: ", err.Error())
+		fmt.Println(cmd.String())
+		return err
+	}
 
-    return nil
+	return nil
 }
 
-func (d *downloader) downloadFile(dir, name, downloadUrl string) error {
-    resp, err := http.Get(downloadUrl)
-    if err != nil  {
-        return err
-    }
-    defer resp.Body.Close()
+func (d *downloader) downloadFile(dir, name, downloadURL string) error {
+	resp, err := http.Get(downloadURL)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
 
-    parsedUrl, err :=  url.Parse(downloadUrl)
-    if err != nil {
-        return err
-    }
+	parsedURL, err := url.Parse(downloadURL)
+	if err != nil {
+		return err
+	}
 
-    err = mkdirAll(dir + "/")
-    if err != nil {
-        return err
-    }
+	err = mkdirAll(dir + "/")
+	if err != nil {
+		return err
+	}
 
-    f, err := os.Create(dir + "/" + name + path.Ext(parsedUrl.Path))
-    if err != nil {
-        return err
-    }
-    defer f.Close()
+	f, err := os.Create(dir + "/" + name + path.Ext(parsedURL.Path))
+	if err != nil {
+		return err
+	}
+	defer f.Close()
 
-    _, err = io.Copy(f, resp.Body)
-    return err
+	_, err = io.Copy(f, resp.Body)
+	return err
 }
