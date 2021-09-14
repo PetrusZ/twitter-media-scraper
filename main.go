@@ -36,6 +36,7 @@ func main() {
         }
     }
 
+    close(d.info)
     d.Wait()
 }
 
