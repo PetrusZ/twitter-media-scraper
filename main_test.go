@@ -68,7 +68,7 @@ func TestDownloadFile(t *testing.T) {
 		{"baidu", "http://www.baidu.co", "index", false},
 	}
 
-	d := downloader{}
+	d := GetDownloaderInstance()
 	for _, tt := range tests {
 		actual := d.downloadFile(testDir+"/"+tt.dir, tt.fileURL, tt.name)
 		if !(tt.expected == true && actual == nil) && !(tt.expected == false && actual != nil) {
@@ -94,7 +94,7 @@ func TestParallelDownloadFile(t *testing.T) {
 		{"Paralle", "https://t1.huishahe.com/uploads/tu/zyf/tt/20160520/erx0a4ooid2.jpg", "bigPic8", true},
 	}
 
-	d := downloader{}
+	d := GetDownloaderInstance()
 	var fileSize int64
 	for _, tt := range tests {
 		actual := d.downloadFile(testDir+"/"+tt.dir, tt.name, tt.fileURL)
