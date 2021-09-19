@@ -2,7 +2,7 @@
 
 SOURCE = main.go downloader.go utils.go config.go
 
-TEMP = out/BBCWorld test
+TEMP = out/BBCWorld out/wbpictures test
 
 run:
 	go run $(SOURCE)

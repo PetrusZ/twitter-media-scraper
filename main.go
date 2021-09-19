@@ -44,13 +44,6 @@ func getUserTweets(user string, amount int, d *downloader) (err error) {
 	scraper := twitterscraper.New()
 	tweets := scraper.GetTweets(context.Background(), user, amount)
 
-	if tweets == nil {
-		err = mkdirAll("out/" + user + "/")
-		if err != nil {
-			return err
-		}
-	}
-
 	for tweet := range tweets {
 		if tweet.Error != nil {
 			return tweet.Error

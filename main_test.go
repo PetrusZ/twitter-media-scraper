@@ -53,6 +53,25 @@ func TestMkdirAll(t *testing.T) {
 	}
 }
 
+func TestDownloadVideo(t *testing.T) {
+	var tests = []struct {
+		dir      string
+		fileURL  string
+		expected bool
+	}{
+		{"BBCWorld", "https://twitter.com/BBCWorld/status/1439286551733800960", true},
+		{"BBCWorld", "https://twitter.com/BBCWorld/status/14392865517338", false},
+	}
+
+	d := GetDownloaderInstance()
+	for _, tt := range tests {
+		actual := d.downloadVideo(testDir+"/"+tt.dir, tt.fileURL)
+		if !(tt.expected == true && actual == nil) && !(tt.expected == false && actual != nil) {
+			t.Errorf("downloadFile(%s, %s): err = %s, expected %s", tt.dir, tt.fileURL, actual, convertBoolToString(tt.expected))
+		}
+	}
+}
+
 func TestDownloadFile(t *testing.T) {
 	var tests = []struct {
 		dir      string
@@ -66,6 +85,7 @@ func TestDownloadFile(t *testing.T) {
 		{"baidu", "https://www.baidu.com", "https_index", true},
 		{"baidu", "http://www.baidu.com", "http_index", true},
 		{"baidu", "http://www.baidu.co", "index", false},
+		{"baidu", "http://www.baidu", "index", false},
 	}
 
 	d := GetDownloaderInstance()
@@ -127,6 +147,7 @@ func TestGetUserTweets(t *testing.T) {
 		{"128j122js,.xzdmcvwe", 50, false},
 		{"BBCWorld", 50, true},
 		{"BBCWorld", 0, true},
+		{"wbpictures", 50, true},
 		{"", 50, false},
 	}
 
@@ -136,7 +157,25 @@ func TestGetUserTweets(t *testing.T) {
 	for _, tt := range tests {
 		actual := getUserTweets(tt.user, tt.amount, d)
 		if !(tt.expected == true && actual == nil) && !(tt.expected == false && actual != nil) {
-			t.Errorf("getUserTweets(%s, %d: err = %s, expected %s", tt.user, tt.amount, actual, convertBoolToString(tt.expected))
+			t.Errorf("getUserTweets(%s, %d): err = %s, expected %s", tt.user, tt.amount, actual, convertBoolToString(tt.expected))
+		}
+	}
+}
+
+func TestLoad(t *testing.T) {
+	var tests = []struct {
+		name     string
+		expected bool
+	}{
+		{"config.json", true},
+		{"abc.json", false},
+	}
+
+	config := NewConfigFile()
+	for _, tt := range tests {
+		actual := config.Load(tt.name)
+		if !(tt.expected == true && actual == nil) && !(tt.expected == false && actual != nil) {
+			t.Errorf("Load(%s): err = %s, expected %s", tt.name, actual, convertBoolToString(tt.expected))
 		}
 	}
 }
