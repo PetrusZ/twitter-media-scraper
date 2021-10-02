@@ -4,6 +4,8 @@ SOURCE = main.go downloader.go utils.go config.go
 
 TEMP = out/BBCWorld out/wbpictures test
 
+all: run
+
 run:
 	go run $(SOURCE)
 
