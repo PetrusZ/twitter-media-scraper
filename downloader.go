@@ -1,13 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
-	"os/exec"
 	"path"
 	"sync"
 )
@@ -76,6 +74,7 @@ func (d *downloader) Wait() {
 	d.wg.Wait()
 }
 
+/*
 func (d *downloader) downloadVideo(dir, url string) error {
 
 	arg := dir + "/%(upload_date)s - %(id)s.%(ext)s"
@@ -90,6 +89,7 @@ func (d *downloader) downloadVideo(dir, url string) error {
 
 	return nil
 }
+*/
 
 func (d *downloader) downloadFile(dir, name, downloadURL string) error {
 	resp, err := http.Get(downloadURL)

@@ -53,6 +53,7 @@ func TestMkdirAll(t *testing.T) {
 	}
 }
 
+/*
 func TestDownloadVideo(t *testing.T) {
 	var tests = []struct {
 		dir      string
@@ -71,6 +72,7 @@ func TestDownloadVideo(t *testing.T) {
 		}
 	}
 }
+*/
 
 func TestDownloadFile(t *testing.T) {
 	var tests = []struct {
