@@ -21,10 +21,9 @@ const (
 )
 
 type tweetInfo struct {
-	dir       string
-	name      string
-	url       string
-	tweetType tweetType
+	dir  string
+	name string
+	url  string
 }
 
 type downloader struct {
@@ -51,12 +50,7 @@ func (d *downloader) Start(count int) {
 
 				// log.Printf("workerId %d got tweetInfo: dir %s, name %s, url %s\n", workerId, info.dir, info.name, info.url)
 
-				var err error
-				if info.tweetType == Video {
-					err = d.downloadFile("out/"+info.dir, info.name, info.url)
-				} else if info.tweetType == Photo {
-					err = d.downloadFile("out/"+info.dir, info.name, info.url+"?format=jpg&name=orig")
-				}
+				err := d.downloadFile("out/"+info.dir, info.name, info.url)
 
 				if err != nil {
 					log.Printf("workerId %d got tweetInfo: dir %s, name %s, url %s\n", workerID, info.dir, info.name, info.url)

@@ -55,7 +55,7 @@ func getUserTweets(user string, amount int, d *downloader) (err error) {
 		if getVideos {
 			if tweet.Videos != nil {
 				for _, video := range tweet.Videos {
-					tweetInfo := tweetInfo{user, date + " - " + tweet.ID, video.URL, Video}
+					tweetInfo := tweetInfo{user, date + " - " + tweet.ID, video.URL}
 					d.info <- tweetInfo
 				}
 			}
@@ -64,7 +64,7 @@ func getUserTweets(user string, amount int, d *downloader) (err error) {
 		if getPhotos {
 			if tweet.Videos == nil {
 				for id, url := range tweet.Photos {
-					tweetInfo := tweetInfo{user, date + " - " + tweet.ID + "-" + fmt.Sprint(id), url, Photo}
+					tweetInfo := tweetInfo{user, date + " - " + tweet.ID + "-" + fmt.Sprint(id), url + "?format=jpg&name=orig"}
 					d.info <- tweetInfo
 				}
 			}
