@@ -55,7 +55,7 @@ func (d *downloader) Start(count int) {
 
 				var err error
 				if info.tweetType == Video {
-					err = d.downloadVideo("out/"+info.dir, info.url)
+					err = d.downloadFile("out/"+info.dir, info.name, info.url)
 				} else if info.tweetType == Photo {
 					err = d.downloadFile("out/"+info.dir, info.name, info.url+"?format=jpg&name=orig")
 				}

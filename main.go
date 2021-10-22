@@ -49,19 +49,21 @@ func getUserTweets(user string, amount int, d *downloader) (err error) {
 			return tweet.Error
 		}
 
-		url := "https://twitter.com/" + user + "/status/" + tweet.ID
+		// url := "https://twitter.com/" + user + "/status/" + tweet.ID
+		date := fmt.Sprintf("%d%02d%02d", tweet.TimeParsed.Year(), tweet.TimeParsed.Month(), tweet.TimeParsed.Day())
 
 		if getVideos {
 			if tweet.Videos != nil {
-				tweetInfo := tweetInfo{user, "", url, Video}
-				d.info <- tweetInfo
+				for _, video := range tweet.Videos {
+					tweetInfo := tweetInfo{user, date + " - " + tweet.ID, video.URL, Video}
+					d.info <- tweetInfo
+				}
 			}
 		}
 
 		if getPhotos {
 			if tweet.Videos == nil {
 				for id, url := range tweet.Photos {
-					date := fmt.Sprintf("%d%02d%02d", tweet.TimeParsed.Year(), tweet.TimeParsed.Month(), tweet.TimeParsed.Day())
 					tweetInfo := tweetInfo{user, date + " - " + tweet.ID + "-" + fmt.Sprint(id), url, Photo}
 					d.info <- tweetInfo
 				}
