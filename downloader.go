@@ -42,13 +42,15 @@ func GetDownloaderInstance() *downloader {
 func (d *downloader) Start(count int) {
 	for i := 0; i < count; i++ {
 		workerID := i
+		d.wg.Add(1)
 		go func() {
-			// log.Printf("workerId %d start\n", workerId)
+			// log.Printf("workerId %d start\n", workerID)
+
+			defer d.wg.Done()
 
 			for info := range d.info {
-				d.wg.Add(1)
 
-				// log.Printf("workerId %d got tweetInfo: dir %s, name %s, url %s\n", workerId, info.dir, info.name, info.url)
+				// log.Printf("workerId %d got tweetInfo: dir %s, name %s, url %s\n", workerID, info.dir, info.name, info.url)
 
 				err := d.downloadFile("out/"+info.dir, info.name, info.url)
 
@@ -57,9 +59,8 @@ func (d *downloader) Start(count int) {
 					log.Printf("Error: %s", err)
 				}
 
-				d.wg.Done()
 			}
-			// log.Printf("workerId %d end\n", workerId)
+			// log.Printf("workerId %d end\n", workerID)
 		}()
 	}
 }
