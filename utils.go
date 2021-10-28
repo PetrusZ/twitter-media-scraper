@@ -1,6 +1,10 @@
 package main
 
-import "os"
+import (
+	"fmt"
+	"os"
+	"runtime/debug"
+)
 
 func mkdir(dir string) error {
 	_, err := os.Stat(dir)
@@ -26,4 +30,17 @@ func mkdirAll(dir string) error {
 		}
 	}
 	return nil
+}
+
+func Go(fn func()) {
+	go func() {
+		defer func() {
+			if err := recover(); err != nil {
+				fmt.Println(err)
+				debug.PrintStack()
+			}
+		}()
+
+		fn()
+	}()
 }

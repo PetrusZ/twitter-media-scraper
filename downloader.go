@@ -43,7 +43,7 @@ func (d *downloader) Start(count int) {
 	for i := 0; i < count; i++ {
 		workerID := i
 		d.wg.Add(1)
-		go func() {
+		Go(func() {
 			// log.Printf("workerId %d start\n", workerID)
 
 			defer d.wg.Done()
@@ -61,7 +61,7 @@ func (d *downloader) Start(count int) {
 
 			}
 			// log.Printf("workerId %d end\n", workerID)
-		}()
+		})
 	}
 }
 

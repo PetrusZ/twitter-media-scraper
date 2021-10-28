@@ -53,6 +53,26 @@ func TestMkdirAll(t *testing.T) {
 	}
 }
 
+func TestGo(t *testing.T) {
+	f1 := func() {
+	}
+
+	f2 := func() {
+		panic("panic test")
+	}
+	var tests = []struct {
+		fn       func()
+		expected bool
+	}{
+		{f1, true},
+		{f2, true},
+	}
+
+	for _, tt := range tests {
+		Go(tt.fn)
+	}
+}
+
 /*
 func TestDownloadVideo(t *testing.T) {
 	var tests = []struct {
