@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"io"
 	"os"
 	"testing"
 )
@@ -198,6 +200,26 @@ func TestLoad(t *testing.T) {
 			t.Errorf("Load(%s): err = %s, expected %s", tt.name, actual, convertBoolToString(tt.expected))
 		}
 	}
+	t.Run("error on bodyReader", func(t *testing.T) {
+		config.SetBodyReader(func(io.Reader) ([]byte, error) {
+			return nil, errors.New("")
+		})
+		err := config.Load("config.json")
+		if err == nil {
+			t.Errorf("Load(): err = %s, expected err", err)
+		}
+	})
+
+	t.Run("error on unMarshaller", func(t *testing.T) {
+		config.SetBodyReader(io.ReadAll)
+		config.SetUnmarshaller(func([]byte, interface{}) error {
+			return errors.New("")
+		})
+		err := config.Load("config.json")
+		if err == nil {
+			t.Errorf("Load(): err = %s, expected err", err)
+		}
+	})
 }
 
 func convertBoolToString(b bool) string {
