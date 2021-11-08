@@ -201,9 +201,9 @@ func TestLoad(t *testing.T) {
 		}
 	}
 	t.Run("error on bodyReader", func(t *testing.T) {
-		config.SetBodyReader(func(io.Reader) ([]byte, error) {
+		bodyReader = func(io.Reader) ([]byte, error) {
 			return nil, errors.New("")
-		})
+		}
 		err := config.Load("config.json")
 		if err == nil {
 			t.Errorf("Load(): err = %s, expected err", err)
@@ -211,10 +211,10 @@ func TestLoad(t *testing.T) {
 	})
 
 	t.Run("error on unMarshaller", func(t *testing.T) {
-		config.SetBodyReader(io.ReadAll)
-		config.SetUnmarshaller(func([]byte, interface{}) error {
+		bodyReader = io.ReadAll
+		unMarshaller = func([]byte, interface{}) error {
 			return errors.New("")
-		})
+		}
 		err := config.Load("config.json")
 		if err == nil {
 			t.Errorf("Load(): err = %s, expected err", err)

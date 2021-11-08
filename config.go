@@ -13,15 +13,11 @@ type RespUnmarshaller func([]byte, interface{}) error
 type ConfigFile interface {
 	Load() error
 	GetConfigs() []Config
-	SetBodyReader(BodyReader)
-	SetUnmarshaller(RespUnmarshaller)
 }
 
 type configFile struct {
-	fileName     string
-	Configs      []Config
-	bodyReader   BodyReader
-	unMarshaller RespUnmarshaller
+	fileName string
+	Configs  []Config
 }
 
 type Config struct {
@@ -31,11 +27,12 @@ type Config struct {
 	GetPhotos   bool   `json:"get_photos"`
 }
 
+var bodyReader = ioutil.ReadAll
+var unMarshaller = json.Unmarshal
+
 func NewConfigFile(fileName string) (ConfigFile, error) {
 	return &configFile{
-		fileName:     fileName,
-		bodyReader:   ioutil.ReadAll,
-		unMarshaller: json.Unmarshal,
+		fileName: fileName,
 	}, nil
 }
 
@@ -50,23 +47,15 @@ func (c *configFile) Load() error {
 	}
 	defer jsonFile.Close()
 
-	byteValue, err := c.bodyReader(jsonFile)
+	byteValue, err := bodyReader(jsonFile)
 	if err != nil {
 		return err
 	}
 
-	err = c.unMarshaller(byteValue, &c.Configs)
+	err = unMarshaller(byteValue, &c.Configs)
 	if err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func (c *configFile) SetBodyReader(bodyReader BodyReader) {
-	c.bodyReader = bodyReader
-}
-
-func (c *configFile) SetUnmarshaller(unMarshaller RespUnmarshaller) {
-	c.unMarshaller = unMarshaller
 }
