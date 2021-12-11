@@ -1,13 +1,13 @@
 [
     {
-        "user_name": "",
-        "tweet_amount": 1000,
+        "user_name": "BBCWorld",
+        "tweet_amount": 50,
         "get_videos": true,
         "get_photos": true
     },
     {
-        "user_name": "",
-        "tweet_amount": 1000,
+        "user_name": "wbpictures",
+        "tweet_amount": 50,
         "get_videos": true,
         "get_photos": true
     }
