@@ -13,7 +13,7 @@ func main() {
 	flag.StringVar(&configName, "configFile", "config.json", "Input configFile name")
 	flag.Parse()
 
-	configFile := NewConfigFile("config.json")
+	configFile := NewConfigFile(configName)
 
 	err := configFile.Load()
 	if err != nil {
@@ -25,7 +25,9 @@ func main() {
 	for _, config := range configFile.GetConfigs() {
 		if config.UserName != "" {
 			err := getUserTweets(config.UserName, config.TweetAmount, config.GetVideos, config.GetPhotos, d)
-			fmt.Println(err)
+			if err != nil {
+				fmt.Println(err)
+			}
 		} else {
 			fmt.Println("No twitter user")
 		}

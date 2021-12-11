@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -87,28 +88,32 @@ func (d *downloader) Wait() {
 func (d *downloader) downloadFile(dir, name, downloadURL string) error {
 	resp, err := http.Get(downloadURL)
 	if err != nil {
-		return err
+		return fmt.Errorf("http.Get(%s) error: %w", downloadURL, err)
 	}
 	defer resp.Body.Close()
 
 	parsedURL, err := url.Parse(downloadURL)
 	if err != nil {
-		return err
+		return fmt.Errorf("url.Parse(%s) error: %w", downloadURL, err)
 	}
 
 	err = mkdirAll(dir + "/")
 	if err != nil {
-		return err
+		return fmt.Errorf("mkdirAll(%s) error: %w", dir+"/", err)
 	}
 
 	f, err := os.Create(dir + "/" + name + path.Ext(parsedURL.Path))
 	if err != nil {
-		return err
+		return fmt.Errorf("os.Create(%s) error: %w", dir+"/"+name+path.Ext(parsedURL.Path), err)
 	}
 	defer f.Close()
 
 	_, err = io.Copy(f, resp.Body)
-	return err
+	if err != nil {
+		return fmt.Errorf("io.Copy error: %w", err)
+	}
+
+	return nil
 }
 
 /*

@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -43,18 +44,18 @@ func (c *configFile) GetConfigs() []Config {
 func (c *configFile) Load() error {
 	jsonFile, err := os.Open(c.fileName)
 	if err != nil {
-		return err
+		return fmt.Errorf("os.Open(%s) error: %w", c.fileName, err)
 	}
 	defer jsonFile.Close()
 
 	byteValue, err := readAllFunc(jsonFile)
 	if err != nil {
-		return err
+		return fmt.Errorf("readAllFunc error: %w", err)
 	}
 
 	err = unMarshalFunc(byteValue, &c.Configs)
 	if err != nil {
-		return err
+		return fmt.Errorf("unMarshalFunc error: %w", err)
 	}
 
 	return nil
