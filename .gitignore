@@ -1,3 +1,5 @@
 out/
 test/
 .idea
+*.old
+twitter_scraper
