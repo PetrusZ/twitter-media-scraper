@@ -1,13 +1,33 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
+	"flag"
 	"io"
+	"io/fs"
 	"os"
 	"testing"
 )
 
 var testDir = "test"
+
+func setupMkdirAll() {
+	mkdirAllFunc = func(string, fs.FileMode) error {
+		return errors.New("Can't mkdirAll")
+	}
+}
+
+func cleanupMkdirAll() {
+	mkdirAllFunc = os.MkdirAll
+}
+
+func convertBoolToString(b bool) string {
+	if b {
+		return "successed"
+	}
+	return "failed"
+}
 
 func TestMkdir(t *testing.T) {
 	var tests = []struct {
@@ -47,12 +67,22 @@ func TestMkdirAll(t *testing.T) {
 	}
 
 	mkdir(testDir)
+	os.RemoveAll("testDir" + "/" + "1")
 	for _, tt := range tests {
 		actual := mkdirAll(testDir + "/" + tt.dir)
 		if !(tt.expected == true && actual == nil) && !(tt.expected == false && actual != nil) {
 			t.Errorf("mkdir(%s): err = %s, expected %s", tt.dir, actual, convertBoolToString(tt.expected))
 		}
 	}
+
+	setupMkdirAll()
+
+	err := mkdirAll("abc")
+	if err == nil {
+		t.Error("mkdirAll expected has err, but got nil")
+	}
+
+	cleanupMkdirAll()
 }
 
 func TestGo(t *testing.T) {
@@ -99,8 +129,8 @@ func TestDownloadVideo(t *testing.T) {
 func TestDownloadFile(t *testing.T) {
 	var tests = []struct {
 		dir      string
-		name     string
 		fileURL  string
+		name     string
 		expected bool
 	}{
 		{"", "https://www.baidu.com", "https_index", true},
@@ -109,16 +139,25 @@ func TestDownloadFile(t *testing.T) {
 		{"baidu", "https://www.baidu.com", "https_index", true},
 		{"baidu", "http://www.baidu.com", "http_index", true},
 		{"baidu", "http://www.baidu.co", "index", false},
-		{"baidu", "http://www.baidu", "index", false},
+		{"baidu", "baidu", "index", false},
 	}
 
 	d := GetDownloaderInstance(16)
 	for _, tt := range tests {
-		actual := d.downloadFile(testDir+"/"+tt.dir, tt.fileURL, tt.name)
+		actual := d.downloadFile(testDir+"/"+tt.dir, tt.name, tt.fileURL)
 		if !(tt.expected == true && actual == nil) && !(tt.expected == false && actual != nil) {
 			t.Errorf("downloadFile(%s, %s, %s): err = %s, expected %s", tt.dir, tt.fileURL, tt.name, actual, convertBoolToString(tt.expected))
 		}
 	}
+
+	setupMkdirAll()
+
+	err := d.downloadFile(testDir+"/testDownloadFile", "index", "http://www.baidu.com")
+	if err == nil {
+		t.Error("downloadFile expected err, but got nil")
+	}
+
+	cleanupMkdirAll()
 }
 
 func TestParallelDownloadFile(t *testing.T) {
@@ -201,7 +240,7 @@ func TestLoad(t *testing.T) {
 		}
 	}
 	t.Run("error on bodyReader", func(t *testing.T) {
-		bodyReader = func(io.Reader) ([]byte, error) {
+		readAllFunc = func(io.Reader) ([]byte, error) {
 			return nil, errors.New("")
 		}
 		err := config.Load("config.json")
@@ -211,8 +250,8 @@ func TestLoad(t *testing.T) {
 	})
 
 	t.Run("error on unMarshaller", func(t *testing.T) {
-		bodyReader = io.ReadAll
-		unMarshaller = func([]byte, interface{}) error {
+		readAllFunc = io.ReadAll
+		unMarshalFunc = func([]byte, interface{}) error {
 			return errors.New("")
 		}
 		err := config.Load("config.json")
@@ -220,11 +259,28 @@ func TestLoad(t *testing.T) {
 			t.Errorf("Load(): err = %s, expected err", err)
 		}
 	})
+
+	readAllFunc = io.ReadAll
+	unMarshalFunc = json.Unmarshal
 }
 
-func convertBoolToString(b bool) string {
-	if b {
-		return "successed"
+func TestFlags(T *testing.T) {
+	// We manipuate the Args to set them up for the testcases
+	// after this test we restore the initial args
+	oldArgs := os.Args
+	defer func() { os.Args = oldArgs }()
+	cases := []struct {
+		Name string
+		Args []string
+	}{
+		// {"flags set", []string{"-configFile", "dontExits"}},
+		{"flags not set", []string{""}},
 	}
-	return "failed"
+	for _, tc := range cases {
+		// this call is required because otherwise flags panics, if args are set between flag.Parse calls
+		flag.CommandLine = flag.NewFlagSet(tc.Name, flag.ExitOnError)
+		// we need a value to set Args[0] to, cause flag begins parsing at Args[1]
+		os.Args = append([]string{tc.Name}, tc.Args...)
+		main()
+	}
 }

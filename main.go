@@ -2,12 +2,17 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 
 	twitterscraper "github.com/n0madic/twitter-scraper"
 )
 
 func main() {
+	var configName string
+	flag.StringVar(&configName, "configFile", "config.json", "Input configFile name")
+	flag.Parse()
+
 	configFile, err := NewConfigFile("config.json")
 	if err != nil {
 		panic(err)

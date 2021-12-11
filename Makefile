@@ -14,7 +14,7 @@ run:
 build:
 	go build -o $(PROJECT) $(SOURCE)
 
-test:
+test: clean
 	go test
 
 clean:

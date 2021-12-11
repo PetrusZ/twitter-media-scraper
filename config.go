@@ -27,8 +27,8 @@ type Config struct {
 	GetPhotos   bool   `json:"get_photos"`
 }
 
-var bodyReader = ioutil.ReadAll
-var unMarshaller = json.Unmarshal
+var readAllFunc = ioutil.ReadAll
+var unMarshalFunc = json.Unmarshal
 
 func NewConfigFile(fileName string) (ConfigFile, error) {
 	return &configFile{
@@ -47,12 +47,12 @@ func (c *configFile) Load() error {
 	}
 	defer jsonFile.Close()
 
-	byteValue, err := bodyReader(jsonFile)
+	byteValue, err := readAllFunc(jsonFile)
 	if err != nil {
 		return err
 	}
 
-	err = unMarshaller(byteValue, &c.Configs)
+	err = unMarshalFunc(byteValue, &c.Configs)
 	if err != nil {
 		return err
 	}
