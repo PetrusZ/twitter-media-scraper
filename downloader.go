@@ -38,13 +38,13 @@ type downloader struct {
 	wg   sync.WaitGroup
 }
 
-func NewDownloader() (Downloader, error) {
-	return &downloader{info: make(chan tweetInfo)}, nil
+func NewDownloader() Downloader {
+	return &downloader{info: make(chan tweetInfo)}
 }
 
 func GetDownloaderInstance(count int) Downloader {
 	once.Do(func() {
-		downloaderInstance, _ = NewDownloader()
+		downloaderInstance = NewDownloader()
 		downloaderInstance.Start(count)
 	})
 	return downloaderInstance

@@ -30,10 +30,10 @@ type Config struct {
 var readAllFunc = ioutil.ReadAll
 var unMarshalFunc = json.Unmarshal
 
-func NewConfigFile(fileName string) (ConfigFile, error) {
+func NewConfigFile(fileName string) ConfigFile {
 	return &configFile{
 		fileName: fileName,
-	}, nil
+	}
 }
 
 func (c *configFile) GetConfigs() []Config {

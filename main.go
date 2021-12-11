@@ -13,12 +13,9 @@ func main() {
 	flag.StringVar(&configName, "configFile", "config.json", "Input configFile name")
 	flag.Parse()
 
-	configFile, err := NewConfigFile("config.json")
-	if err != nil {
-		panic(err)
-	}
+	configFile := NewConfigFile("config.json")
 
-	err = configFile.Load()
+	err := configFile.Load()
 	if err != nil {
 		panic(err)
 	}
@@ -27,7 +24,8 @@ func main() {
 
 	for _, config := range configFile.GetConfigs() {
 		if config.UserName != "" {
-			getUserTweets(config.UserName, config.TweetAmount, config.GetVideos, config.GetPhotos, d)
+			err := getUserTweets(config.UserName, config.TweetAmount, config.GetVideos, config.GetPhotos, d)
+			fmt.Println(err)
 		} else {
 			fmt.Println("No twitter user")
 		}
@@ -43,7 +41,7 @@ func getUserTweets(user string, amount int, getVideos bool, getPhotos bool, d Do
 
 	for tweet := range tweets {
 		if tweet.Error != nil {
-			return tweet.Error
+			return fmt.Errorf("tweet.Error: %w", tweet.Error)
 		}
 
 		// url := "https://twitter.com/" + user + "/status/" + tweet.ID

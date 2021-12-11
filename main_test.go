@@ -233,7 +233,7 @@ func TestLoad(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		config, _ := NewConfigFile(tt.name)
+		config := NewConfigFile(tt.name)
 		actual := config.Load()
 		if !(tt.expected == true && actual == nil) && !(tt.expected == false && actual != nil) {
 			t.Errorf("Load(%s): err = %s, expected %s", tt.name, actual, convertBoolToString(tt.expected))
@@ -243,7 +243,8 @@ func TestLoad(t *testing.T) {
 		readAllFunc = func(io.Reader) ([]byte, error) {
 			return nil, errors.New("")
 		}
-		err := config.Load("config.json")
+		config := NewConfigFile("config.json")
+		err := config.Load()
 		if err == nil {
 			t.Errorf("Load(): err = %s, expected err", err)
 		}
@@ -254,7 +255,8 @@ func TestLoad(t *testing.T) {
 		unMarshalFunc = func([]byte, interface{}) error {
 			return errors.New("")
 		}
-		err := config.Load("config.json")
+		config := NewConfigFile("config.json")
+		err := config.Load()
 		if err == nil {
 			t.Errorf("Load(): err = %s, expected err", err)
 		}
