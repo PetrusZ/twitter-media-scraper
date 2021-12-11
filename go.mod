@@ -1,4 +1,4 @@
-module github.com/PetrusZ/twitter_scraper
+module github.com/PetrusZ/twitter-media-scraper
 
 go 1.15
 
