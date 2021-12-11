@@ -10,7 +10,7 @@ import (
 	"sync"
 )
 
-var downloaderInstance *downloader
+var downloaderInstance Downloader
 var once sync.Once
 
 type tweetType int
@@ -26,17 +26,32 @@ type tweetInfo struct {
 	url  string
 }
 
+type Downloader interface {
+	Start(int)
+	Wait()
+	GetInfo() chan tweetInfo
+	downloadFile(string, string, string) error
+}
+
 type downloader struct {
 	info chan tweetInfo
 	wg   sync.WaitGroup
 }
 
-func GetDownloaderInstance() *downloader {
+func NewDownloader() (Downloader, error) {
+	return &downloader{info: make(chan tweetInfo)}, nil
+}
+
+func GetDownloaderInstance(count int) Downloader {
 	once.Do(func() {
-		downloaderInstance = &downloader{info: make(chan tweetInfo)}
-		downloaderInstance.Start(16)
+		downloaderInstance, _ = NewDownloader()
+		downloaderInstance.Start(count)
 	})
 	return downloaderInstance
+}
+
+func (d *downloader) GetInfo() chan tweetInfo {
+	return d.info
 }
 
 func (d *downloader) Start(count int) {
@@ -69,23 +84,6 @@ func (d *downloader) Wait() {
 	d.wg.Wait()
 }
 
-/*
-func (d *downloader) downloadVideo(dir, url string) error {
-
-	arg := dir + "/%(upload_date)s - %(id)s.%(ext)s"
-
-	cmd := exec.Command("youtube-dl", "-o", arg, url)
-	err := cmd.Run()
-	if err != nil {
-		fmt.Println("cmd error: ", err.Error())
-		fmt.Println(cmd.String())
-		return err
-	}
-
-	return nil
-}
-*/
-
 func (d *downloader) downloadFile(dir, name, downloadURL string) error {
 	resp, err := http.Get(downloadURL)
 	if err != nil {
@@ -112,3 +110,20 @@ func (d *downloader) downloadFile(dir, name, downloadURL string) error {
 	_, err = io.Copy(f, resp.Body)
 	return err
 }
+
+/*
+func (d *downloader) downloadVideo(dir, url string) error {
+
+	arg := dir + "/%(upload_date)s - %(id)s.%(ext)s"
+
+	cmd := exec.Command("youtube-dl", "-o", arg, url)
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println("cmd error: ", err.Error())
+		fmt.Println(cmd.String())
+		return err
+	}
+
+	return nil
+}
+*/

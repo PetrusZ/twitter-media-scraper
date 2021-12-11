@@ -6,7 +6,12 @@ import (
 	"os"
 )
 
-type ConfigFile struct {
+type ConfigFile interface {
+	Load() error
+	GetConfigs() []Config
+}
+
+type configFile struct {
 	fileName string
 	Configs  []Config
 }
@@ -18,17 +23,20 @@ type Config struct {
 	GetPhotos   bool   `json:"get_photos"`
 }
 
-func NewConfigFile() *ConfigFile {
-	return &ConfigFile{}
+func NewConfigFile(fileName string) (ConfigFile, error) {
+	return &configFile{fileName: fileName}, nil
 }
 
-func (c *ConfigFile) Load(name string) error {
-	jsonFile, err := os.Open(name)
+func (c *configFile) GetConfigs() []Config {
+	return c.Configs
+}
+
+func (c *configFile) Load() error {
+	jsonFile, err := os.Open(c.fileName)
 	if err != nil {
 		return err
 	}
 	defer jsonFile.Close()
-	c.fileName = name
 
 	byteValue, err := ioutil.ReadAll(jsonFile)
 	if err != nil {

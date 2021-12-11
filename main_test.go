@@ -110,7 +110,7 @@ func TestDownloadFile(t *testing.T) {
 		{"baidu", "http://www.baidu", "index", false},
 	}
 
-	d := GetDownloaderInstance()
+	d := GetDownloaderInstance(16)
 	for _, tt := range tests {
 		actual := d.downloadFile(testDir+"/"+tt.dir, tt.fileURL, tt.name)
 		if !(tt.expected == true && actual == nil) && !(tt.expected == false && actual != nil) {
@@ -136,7 +136,7 @@ func TestParallelDownloadFile(t *testing.T) {
 		{"Paralle", "https://t1.huishahe.com/uploads/tu/zyf/tt/20160520/erx0a4ooid2.jpg", "bigPic8", true},
 	}
 
-	d := GetDownloaderInstance()
+	d := GetDownloaderInstance(16)
 	var fileSize int64
 	for _, tt := range tests {
 		actual := d.downloadFile(testDir+"/"+tt.dir, tt.name, tt.fileURL)
@@ -173,11 +173,9 @@ func TestGetUserTweets(t *testing.T) {
 		{"", 50, false},
 	}
 
-	getPhotos = true
-	getVideos = true
-	d := GetDownloaderInstance()
+	d := GetDownloaderInstance(16)
 	for _, tt := range tests {
-		actual := getUserTweets(tt.user, tt.amount, d)
+		actual := getUserTweets(tt.user, tt.amount, true, true, d)
 		if !(tt.expected == true && actual == nil) && !(tt.expected == false && actual != nil) {
 			t.Errorf("getUserTweets(%s, %d): err = %s, expected %s", tt.user, tt.amount, actual, convertBoolToString(tt.expected))
 		}
@@ -193,9 +191,9 @@ func TestLoad(t *testing.T) {
 		{"abc.json", false},
 	}
 
-	config := NewConfigFile()
 	for _, tt := range tests {
-		actual := config.Load(tt.name)
+		config, _ := NewConfigFile(tt.name)
+		actual := config.Load()
 		if !(tt.expected == true && actual == nil) && !(tt.expected == false && actual != nil) {
 			t.Errorf("Load(%s): err = %s, expected %s", tt.name, actual, convertBoolToString(tt.expected))
 		}
