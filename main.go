@@ -39,6 +39,7 @@ func main() {
 
 func getUserTweets(user string, amount int, getVideos bool, getPhotos bool, d Downloader) (err error) {
 	scraper := twitterscraper.New()
+	// scraper.WithDelay(60)
 	tweets := scraper.GetTweets(context.Background(), user, amount)
 
 	for tweet := range tweets {

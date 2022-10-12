@@ -3,6 +3,6 @@ module github.com/PetrusZ/twitter-media-scraper
 go 1.15
 
 require (
-	github.com/n0madic/twitter-scraper v0.0.0-20211018203357-a2fb4f82473d
-	golang.org/x/net v0.0.0-20211020060615-d418f374d309 // indirect
+	github.com/n0madic/twitter-scraper v0.0.0-20220616082230-d75fe13dd628
+	golang.org/x/net v0.0.0-20221012135044-0b7e1fb9d458 // indirect
 )

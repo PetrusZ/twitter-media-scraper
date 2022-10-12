@@ -1,5 +1,6 @@
 out/
 test/
 .idea
+.vscode
 *.old
 twitter-media-scraper
