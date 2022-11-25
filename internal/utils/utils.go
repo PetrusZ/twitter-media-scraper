@@ -6,7 +6,10 @@ import (
 	"runtime/debug"
 )
 
-var MkdirAllFunc = os.MkdirAll
+var (
+	MkdirAllFunc = os.MkdirAll
+	Sigs         chan os.Signal
+)
 
 func ConvertBoolToString(b bool) string {
 	if b {

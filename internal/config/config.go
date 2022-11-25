@@ -1,13 +1,15 @@
 package config
 
 import (
+	"syscall"
+
+	"github.com/PetrusZ/twitter-media-scraper/internal/utils"
+	"github.com/fsnotify/fsnotify"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
 
-type configFile struct {
-	fileName string
-	Configs  []Config
-}
+var config Config
 
 type Config struct {
 	Global *GlobalConfig `mapstructure:"global"`
@@ -28,19 +30,25 @@ type UserConfig struct {
 	GetPhotos   *bool   `mapstructure:"get_photos"`
 }
 
-func Load(path string) (config Config, err error) {
+func Load(path string) (Config, error) {
 	viper.AddConfigPath(path)
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 
 	viper.AutomaticEnv()
 
-	err = viper.ReadInConfig()
+	config = Config{}
+	err := viper.ReadInConfig()
 	if err != nil {
-		return
+		log.Error().Err(err).Msg("read in config error")
+		return config, err
 	}
 
 	err = viper.Unmarshal(&config)
+	if err != nil {
+		log.Error().Err(err).Msg("unmarshal config error")
+		return config, err
+	}
 
 	for _, user := range config.Users {
 		if user.TweetAmount == nil {
@@ -56,5 +64,12 @@ func Load(path string) (config Config, err error) {
 		}
 	}
 
-	return
+	return config, nil
+}
+
+func Watch() {
+	viper.OnConfigChange(func(e fsnotify.Event) {
+		utils.Sigs <- syscall.SIGHUP
+	})
+	viper.WatchConfig()
 }

@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"syscall"
 
 	twitterscraper "github.com/n0madic/twitter-scraper"
 	"github.com/rs/zerolog"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/PetrusZ/twitter-media-scraper/internal/config"
 	"github.com/PetrusZ/twitter-media-scraper/internal/downloader"
+	"github.com/PetrusZ/twitter-media-scraper/internal/utils"
 )
 
 func main() {
@@ -19,13 +21,15 @@ func main() {
 	flag.StringVar(&configPath, "configPath", "./configs", "Input config file path")
 	flag.Parse()
 
-	config, err := config.Load(configPath)
+	conf, err := config.Load(configPath)
 	if err != nil {
 		panic(err)
 	}
 
+	config.Watch()
+
 	logLevel := zerolog.InfoLevel
-	switch *config.Global.LogLevel {
+	switch *conf.Global.LogLevel {
 	case "debug":
 		logLevel = zerolog.DebugLevel
 	case "info":
@@ -45,24 +49,49 @@ func main() {
 	zerolog.SetGlobalLevel(logLevel)
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 
+	utils.Sigs = make(chan os.Signal)
 	d := downloader.GetDownloaderInstance(16)
 
 	log.Info().Msg("Downloader starts")
 
-	for _, user := range config.Users {
-		if *user.UserName != "" {
-			err := getUserTweets(*user.UserName, *user.TweetAmount, *user.GetVideos, *user.GetPhotos, d)
-			if err != nil {
-				log.Error().Err(err).Msg("")
-			}
-		} else {
-			log.Error().Msg("No twitter user found")
-		}
-	}
+	for {
+		log.Info().Msg("download start")
 
-	close(d.GetInfo())
-	d.Wait()
-	d.PrintCounter()
+		for _, user := range conf.Users {
+			if *user.UserName != "" {
+				err := getUserTweets(*user.UserName, *user.TweetAmount, *user.GetVideos, *user.GetPhotos, d)
+				if err != nil {
+					log.Error().Err(err).Msg("")
+				}
+			} else {
+				log.Error().Msg("No twitter user found")
+			}
+		}
+
+		close(d.GetInfo())
+		d.Wait()
+		d.PrintCounter()
+
+		log.Info().Msg("download end")
+
+	SIGNAL:
+		for {
+			select {
+			case sig := <-utils.Sigs:
+				if sig == syscall.SIGHUP {
+					conf, err = config.Load(configPath)
+					log.Info().Msg("config reloaded")
+					if err != nil {
+						log.Error().Err(err).Msg("reload config error")
+					} else {
+						break SIGNAL
+					}
+				}
+			}
+		}
+
+		d.Init()
+	}
 }
 
 func getUserTweets(user string, amount int, getVideos bool, getPhotos bool, d downloader.Downloader) (err error) {

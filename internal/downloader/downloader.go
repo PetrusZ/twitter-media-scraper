@@ -37,10 +37,10 @@ type TweetInfo struct {
 
 type Downloader interface {
 	Start(int)
+	Init()
 	Wait()
 	GetInfo() chan TweetInfo
 	PrintCounter()
-	ClearCounter()
 	downloadFile(string, string, string) error
 }
 
@@ -71,24 +71,24 @@ func (d *downloader) Start(count int) {
 		workerID := i
 		d.wg.Add(1)
 		utils.Go(func() {
-			log.Debug().Msgf("workerId %d start\n", workerID)
+			log.Debug().Msgf("workerId %d start", workerID)
 
 			defer d.wg.Done()
 
 			for info := range d.info {
 
-				log.Debug().Msgf("workerId %d got tweetInfo: dir %s, name %s, url %s\n", workerID, info.Dir, info.Name, info.URL)
+				log.Debug().Msgf("workerId %d got tweetInfo: dir %s, name %s, url %s", workerID, info.Dir, info.Name, info.URL)
 
 				err := d.downloadFile("out/"+info.Dir, info.Name, info.URL)
 				if err != nil {
-					log.Error().Msgf("workerId %d got tweetInfo: dir %s, name %s, url %s\n", workerID, info.Dir, info.Name, info.URL)
+					log.Error().Msgf("workerId %d got tweetInfo: dir %s, name %s, url %s", workerID, info.Dir, info.Name, info.URL)
 					log.Error().Msgf("Error: %s", err)
 				} else {
 					d.increaseCounter(info.User, info.TweetType)
 				}
 
 			}
-			log.Debug().Msgf("workerId %d end\n", workerID)
+			log.Debug().Msgf("workerId %d end", workerID)
 		})
 	}
 }
@@ -217,7 +217,8 @@ func (d *downloader) PrintCounter() {
 	})
 }
 
-func (d *downloader) ClearCounter() {
+func (d *downloader) Init() {
+	d.info = make(chan TweetInfo)
 	d.counter.Range(func(user, subKey interface{}) bool {
 		d.counter.Delete(user)
 		return true
