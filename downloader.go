@@ -18,26 +18,34 @@ var once sync.Once
 type tweetType int
 
 const (
-	Photo tweetType = iota
-	Video
+	TweetTypePhoto tweetType = iota
+	TweetTypeVideo
+
+	CounterKeyVideo = "video"
+	CounterKeyPhoto = "photo"
+	CounterKeyTotal = "total"
 )
 
 type tweetInfo struct {
-	dir  string
-	name string
-	url  string
+	user      string
+	dir       string
+	name      string
+	url       string
+	tweetType tweetType
 }
 
 type Downloader interface {
 	Start(int)
 	Wait()
 	GetInfo() chan tweetInfo
+	PrintCounter()
 	downloadFile(string, string, string) error
 }
 
 type downloader struct {
-	info chan tweetInfo
-	wg   sync.WaitGroup
+	info    chan tweetInfo
+	wg      sync.WaitGroup
+	counter sync.Map
 }
 
 func NewDownloader() Downloader {
@@ -70,10 +78,11 @@ func (d *downloader) Start(count int) {
 				log.Debug().Msgf("workerId %d got tweetInfo: dir %s, name %s, url %s\n", workerID, info.dir, info.name, info.url)
 
 				err := d.downloadFile("out/"+info.dir, info.name, info.url)
-
 				if err != nil {
 					log.Error().Msgf("workerId %d got tweetInfo: dir %s, name %s, url %s\n", workerID, info.dir, info.name, info.url)
 					log.Error().Msgf("Error: %s", err)
+				} else {
+					d.increaseCounter(info.user, info.tweetType)
 				}
 
 			}
@@ -117,19 +126,66 @@ func (d *downloader) downloadFile(dir, name, downloadURL string) error {
 	return nil
 }
 
-/*
-func (d *downloader) downloadVideo(dir, url string) error {
-
-	arg := dir + "/%(upload_date)s - %(id)s.%(ext)s"
-
-	cmd := exec.Command("youtube-dl", "-o", arg, url)
-	err := cmd.Run()
-	if err != nil {
-		fmt.Println("cmd error: ", err.Error())
-		fmt.Println(cmd.String())
-		return err
+func (d *downloader) increaseCounter(user string, tweetType tweetType) {
+	count := 1
+	totalCount := 1
+	counter := map[string]int{
+		"photo": 0,
+		"video": 0,
+		"total": 0,
 	}
 
-	return nil
+	subKey := "total"
+	if tweetType == TweetTypeVideo {
+		subKey = "video"
+	} else if tweetType == TweetTypePhoto {
+		subKey = "photo"
+	}
+
+	counterIntf, ok := d.counter.Load(user)
+	if ok {
+		// can get current count
+		counter, ok = counterIntf.(map[string]int)
+		if !ok {
+			log.Error().Msgf("counterIntf = %v convert to map[string]int failed", counter)
+			return
+		}
+
+		countInt, ok := counter[subKey]
+		if !ok {
+			countInt = 0
+		}
+		count = countInt + 1
+
+		totalCountInt, ok := counter["total"]
+		if !ok {
+			totalCountInt = 0
+		}
+		totalCount = totalCountInt + 1
+	}
+
+	counter[subKey] = count
+	counter["total"] = totalCount
+	d.counter.Store(user, counter)
 }
-*/
+
+func (d *downloader) PrintCounter() {
+	d.counter.Range(func(user, subKey interface{}) bool {
+		userStr, ok := user.(string)
+		if !ok {
+			log.Error().Msgf("user %v conver to string failed", user)
+			return false
+		}
+
+		counter, ok := subKey.(map[string]int)
+		if !ok {
+			log.Error().Msgf("user %v conver to map[string]int failed", subKey)
+			return false
+		}
+
+		log.Info().Msgf("user %s downloaded %d photo(s), %d video(s), %d total",
+			userStr, counter[CounterKeyPhoto], counter[CounterKeyVideo], counter[CounterKeyTotal])
+
+		return true
+	})
+}

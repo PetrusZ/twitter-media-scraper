@@ -43,10 +43,11 @@ func main() {
 
 	close(d.GetInfo())
 	d.Wait()
+	d.PrintCounter()
 }
 
 func getUserTweets(user string, amount int, getVideos bool, getPhotos bool, d Downloader) (err error) {
-	log.Info().Msgf("Downloading user %s's video = %t, photos = %t", user, getVideos, getPhotos)
+	log.Debug().Msgf("Downloading user %s's video = %t, photos = %t", user, getVideos, getPhotos)
 
 	scraper := twitterscraper.New()
 	// scraper.WithDelay(60)
@@ -54,7 +55,7 @@ func getUserTweets(user string, amount int, getVideos bool, getPhotos bool, d Do
 
 	for tweet := range tweets {
 		if tweet.Error != nil {
-			return fmt.Errorf("%s's tweet.Error: %w", user, tweet.Error)
+			return fmt.Errorf("%s tweet.Error: %w", user, tweet.Error)
 		}
 
 		// url := "https://twitter.com/" + user + "/status/" + tweet.ID
@@ -62,14 +63,14 @@ func getUserTweets(user string, amount int, getVideos bool, getPhotos bool, d Do
 
 		if getVideos && tweet.Videos != nil {
 			for _, video := range tweet.Videos {
-				tweetInfo := tweetInfo{user, date + " - " + tweet.ID, video.URL}
+				tweetInfo := tweetInfo{user, user, date + " - " + tweet.ID, video.URL, TweetTypeVideo}
 				d.GetInfo() <- tweetInfo
 			}
 		}
 
 		if getPhotos && tweet.Videos == nil {
 			for id, url := range tweet.Photos {
-				tweetInfo := tweetInfo{user, date + " - " + tweet.ID + "-" + fmt.Sprint(id), url + "?format=jpg&name=orig"}
+				tweetInfo := tweetInfo{user, user, date + " - " + tweet.ID + "-" + fmt.Sprint(id), url + "?format=jpg&name=orig", TweetTypePhoto}
 				d.GetInfo() <- tweetInfo
 			}
 		}
