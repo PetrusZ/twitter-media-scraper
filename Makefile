@@ -2,7 +2,7 @@
 
 SOURCE = cmd/main.go
 
-TEMP = out/BBCWorld out/wbpictures cmd/out internal/downloader/test test
+TEMP = out/BBCWorld out/wbpictures cmd/out internal/downloader/test internal/utils/test test
 
 PROJECT = twitter-media-scraper
 

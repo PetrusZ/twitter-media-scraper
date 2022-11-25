@@ -131,11 +131,11 @@ func (d *downloader) downloadFile(dir, name, downloadURL string) error {
 func (d *downloader) increaseCounter(user string, tweetType tweetType) {
 	count := 1
 	totalCount := 1
-	counter := map[string]int{
-		CounterKeyPhoto: 0,
-		CounterKeyVideo: 0,
-		CounterKeyTotal: 0,
-	}
+
+	var counter sync.Map
+	counter.Store(CounterKeyPhoto, 0)
+	counter.Store(CounterKeyVideo, 0)
+	counter.Store(CounterKeyTotal, 0)
 
 	subKey := CounterKeyTotal
 	if tweetType == TweetTypeVideo {
@@ -147,27 +147,37 @@ func (d *downloader) increaseCounter(user string, tweetType tweetType) {
 	counterIntf, ok := d.counter.Load(user)
 	if ok {
 		// can get current count
-		counter, ok = counterIntf.(map[string]int)
+		counter, ok = counterIntf.(sync.Map)
 		if !ok {
-			log.Error().Msgf("counterIntf = %v convert to map[string]int failed", counter)
+			log.Error().Msgf("counterIntf = %v convert to sync.Map failed", counter)
 			return
 		}
 
-		countInt, ok := counter[subKey]
-		if !ok {
-			countInt = 0
+		countInt := 0
+		countIntf, ok := counter.Load(subKey)
+		if ok {
+			countInt, ok = countIntf.(int)
+			if !ok {
+				log.Error().Msgf("countIntf = %v convert to int failed", countIntf)
+				return
+			}
 		}
 		count = countInt + 1
 
-		totalCountInt, ok := counter[CounterKeyTotal]
-		if !ok {
-			totalCountInt = 0
+		totalCountInt := 0
+		totalCountIntf, ok := counter.Load(CounterKeyTotal)
+		if ok {
+			totalCountInt, ok = totalCountIntf.(int)
+			if !ok {
+				log.Error().Msgf("countIntf = %v convert to int failed", totalCountIntf)
+				return
+			}
 		}
 		totalCount = totalCountInt + 1
 	}
 
-	counter[subKey] = count
-	counter[CounterKeyTotal] = totalCount
+	counter.Store(subKey, count)
+	counter.Store(CounterKeyTotal, totalCount)
 	d.counter.Store(user, counter)
 }
 
@@ -179,14 +189,29 @@ func (d *downloader) PrintCounter() {
 			return true
 		}
 
-		counter, ok := subKey.(map[string]int)
+		counter, ok := subKey.(sync.Map)
 		if !ok {
-			log.Error().Msgf("user %v conver to map[string]int failed", subKey)
+			log.Error().Msgf("user %v conver to sync.Map failed", subKey)
 			return true
 		}
 
+		photoCount, ok := counter.Load(CounterKeyPhoto)
+		if !ok {
+			log.Error().Msg("counter.Load(CounterKeyPhoto) failed")
+		}
+
+		videoCount, ok := counter.Load(CounterKeyVideo)
+		if !ok {
+			log.Error().Msg("counter.Load(CounterKeyVideo) failed")
+		}
+
+		totalCount, ok := counter.Load(CounterKeyTotal)
+		if !ok {
+			log.Error().Msg("counter.Load(CounterKeytotal) failed")
+		}
+
 		log.Info().Msgf("user %s downloaded %d photo(s), %d video(s), %d total",
-			userStr, counter[CounterKeyPhoto], counter[CounterKeyVideo], counter[CounterKeyTotal])
+			userStr, photoCount, videoCount, totalCount)
 
 		return true
 	})
