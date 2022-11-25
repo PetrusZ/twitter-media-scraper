@@ -1,0 +1,10 @@
+global:
+  log_level: info
+  tweet_amount: 1000
+  get_videos: true
+  get_photos: true
+users:
+  - username: BBCWorld
+    tweet_amount: 100
+    get_videos: false
+  - username: wbpictures
