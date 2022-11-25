@@ -4,8 +4,11 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"os"
 
 	twitterscraper "github.com/n0madic/twitter-scraper"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
@@ -20,16 +23,21 @@ func main() {
 		panic(err)
 	}
 
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
+
 	d := GetDownloaderInstance(16)
+
+	log.Info().Msg("Downloader starts")
 
 	for _, config := range configFile.GetConfigs() {
 		if config.UserName != "" {
 			err := getUserTweets(config.UserName, config.TweetAmount, config.GetVideos, config.GetPhotos, d)
 			if err != nil {
-				fmt.Println(err)
+				log.Error().Err(err).Msg("")
 			}
 		} else {
-			fmt.Println("No twitter user")
+			log.Error().Msg("No twitter user found")
 		}
 	}
 
@@ -38,13 +46,15 @@ func main() {
 }
 
 func getUserTweets(user string, amount int, getVideos bool, getPhotos bool, d Downloader) (err error) {
+	log.Info().Msgf("Downloading user %s's video = %t, photos = %t", user, getVideos, getPhotos)
+
 	scraper := twitterscraper.New()
 	// scraper.WithDelay(60)
 	tweets := scraper.GetTweets(context.Background(), user, amount)
 
 	for tweet := range tweets {
 		if tweet.Error != nil {
-			return fmt.Errorf("tweet.Error: %w", tweet.Error)
+			return fmt.Errorf("%s's tweet.Error: %w", user, tweet.Error)
 		}
 
 		// url := "https://twitter.com/" + user + "/status/" + tweet.ID

@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
 	"sync"
+
+	"github.com/rs/zerolog/log"
 )
 
 var downloaderInstance Downloader
@@ -60,23 +61,23 @@ func (d *downloader) Start(count int) {
 		workerID := i
 		d.wg.Add(1)
 		Go(func() {
-			// log.Printf("workerId %d start\n", workerID)
+			log.Debug().Msgf("workerId %d start\n", workerID)
 
 			defer d.wg.Done()
 
 			for info := range d.info {
 
-				// log.Printf("workerId %d got tweetInfo: dir %s, name %s, url %s\n", workerID, info.dir, info.name, info.url)
+				log.Debug().Msgf("workerId %d got tweetInfo: dir %s, name %s, url %s\n", workerID, info.dir, info.name, info.url)
 
 				err := d.downloadFile("out/"+info.dir, info.name, info.url)
 
 				if err != nil {
-					log.Printf("workerId %d got tweetInfo: dir %s, name %s, url %s\n", workerID, info.dir, info.name, info.url)
-					log.Printf("Error: %s", err)
+					log.Error().Msgf("workerId %d got tweetInfo: dir %s, name %s, url %s\n", workerID, info.dir, info.name, info.url)
+					log.Error().Msgf("Error: %s", err)
 				}
 
 			}
-			// log.Printf("workerId %d end\n", workerID)
+			log.Debug().Msgf("workerId %d end\n", workerID)
 		})
 	}
 }
