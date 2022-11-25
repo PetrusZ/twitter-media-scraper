@@ -8,5 +8,6 @@ Scrape/Craw twitter user's pictures and videos by username.
 
 # Usage
 
-1. Edit `config.json`
+1. mv `configs/config.example.yaml` to `configs/config.yaml`
+1. Edit `config.yaml`
 2. `make run`
