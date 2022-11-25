@@ -174,13 +174,13 @@ func (d *downloader) PrintCounter() {
 		userStr, ok := user.(string)
 		if !ok {
 			log.Error().Msgf("user %v conver to string failed", user)
-			return false
+			return true
 		}
 
 		counter, ok := subKey.(map[string]int)
 		if !ok {
 			log.Error().Msgf("user %v conver to map[string]int failed", subKey)
-			return false
+			return true
 		}
 
 		log.Info().Msgf("user %s downloaded %d photo(s), %d video(s), %d total",
