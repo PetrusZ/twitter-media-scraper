@@ -130,16 +130,16 @@ func (d *downloader) increaseCounter(user string, tweetType tweetType) {
 	count := 1
 	totalCount := 1
 	counter := map[string]int{
-		"photo": 0,
-		"video": 0,
-		"total": 0,
+		CounterKeyPhoto: 0,
+		CounterKeyVideo: 0,
+		CounterKeyTotal: 0,
 	}
 
-	subKey := "total"
+	subKey := CounterKeyTotal
 	if tweetType == TweetTypeVideo {
-		subKey = "video"
+		subKey = CounterKeyVideo
 	} else if tweetType == TweetTypePhoto {
-		subKey = "photo"
+		subKey = CounterKeyPhoto
 	}
 
 	counterIntf, ok := d.counter.Load(user)
@@ -157,7 +157,7 @@ func (d *downloader) increaseCounter(user string, tweetType tweetType) {
 		}
 		count = countInt + 1
 
-		totalCountInt, ok := counter["total"]
+		totalCountInt, ok := counter[CounterKeyTotal]
 		if !ok {
 			totalCountInt = 0
 		}
@@ -165,7 +165,7 @@ func (d *downloader) increaseCounter(user string, tweetType tweetType) {
 	}
 
 	counter[subKey] = count
-	counter["total"] = totalCount
+	counter[CounterKeyTotal] = totalCount
 	d.counter.Store(user, counter)
 }
 
