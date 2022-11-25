@@ -1,4 +1,4 @@
-package main
+package downloader
 
 import (
 	"fmt"
@@ -9,6 +9,7 @@ import (
 	"path"
 	"sync"
 
+	"github.com/PetrusZ/twitter-media-scraper/internal/utils"
 	"github.com/rs/zerolog/log"
 )
 
@@ -26,31 +27,31 @@ const (
 	CounterKeyTotal = "total"
 )
 
-type tweetInfo struct {
-	user      string
-	dir       string
-	name      string
-	url       string
-	tweetType tweetType
+type TweetInfo struct {
+	User      string
+	Dir       string
+	Name      string
+	URL       string
+	TweetType tweetType
 }
 
 type Downloader interface {
 	Start(int)
 	Wait()
-	GetInfo() chan tweetInfo
+	GetInfo() chan TweetInfo
 	PrintCounter()
 	ClearCounter()
 	downloadFile(string, string, string) error
 }
 
 type downloader struct {
-	info    chan tweetInfo
+	info    chan TweetInfo
 	wg      sync.WaitGroup
 	counter sync.Map
 }
 
 func NewDownloader() Downloader {
-	return &downloader{info: make(chan tweetInfo)}
+	return &downloader{info: make(chan TweetInfo)}
 }
 
 func GetDownloaderInstance(count int) Downloader {
@@ -61,7 +62,7 @@ func GetDownloaderInstance(count int) Downloader {
 	return downloaderInstance
 }
 
-func (d *downloader) GetInfo() chan tweetInfo {
+func (d *downloader) GetInfo() chan TweetInfo {
 	return d.info
 }
 
@@ -69,21 +70,21 @@ func (d *downloader) Start(count int) {
 	for i := 0; i < count; i++ {
 		workerID := i
 		d.wg.Add(1)
-		Go(func() {
+		utils.Go(func() {
 			log.Debug().Msgf("workerId %d start\n", workerID)
 
 			defer d.wg.Done()
 
 			for info := range d.info {
 
-				log.Debug().Msgf("workerId %d got tweetInfo: dir %s, name %s, url %s\n", workerID, info.dir, info.name, info.url)
+				log.Debug().Msgf("workerId %d got tweetInfo: dir %s, name %s, url %s\n", workerID, info.Dir, info.Name, info.URL)
 
-				err := d.downloadFile("out/"+info.dir, info.name, info.url)
+				err := d.downloadFile("out/"+info.Dir, info.Name, info.URL)
 				if err != nil {
-					log.Error().Msgf("workerId %d got tweetInfo: dir %s, name %s, url %s\n", workerID, info.dir, info.name, info.url)
+					log.Error().Msgf("workerId %d got tweetInfo: dir %s, name %s, url %s\n", workerID, info.Dir, info.Name, info.URL)
 					log.Error().Msgf("Error: %s", err)
 				} else {
-					d.increaseCounter(info.user, info.tweetType)
+					d.increaseCounter(info.User, info.TweetType)
 				}
 
 			}
@@ -108,7 +109,7 @@ func (d *downloader) downloadFile(dir, name, downloadURL string) error {
 		return fmt.Errorf("url.Parse(%s) error: %w", downloadURL, err)
 	}
 
-	err = mkdirAll(dir + "/")
+	err = utils.MkdirAll(dir + "/")
 	if err != nil {
 		return fmt.Errorf("mkdirAll(%s) error: %w", dir+"/", err)
 	}

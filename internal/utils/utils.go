@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 
 var mkdirAllFunc = os.MkdirAll
 
-func mkdir(dir string) error {
+func Mkdir(dir string) error {
 	_, err := os.Stat(dir)
 
 	if err != nil {
@@ -21,7 +21,7 @@ func mkdir(dir string) error {
 	return nil
 }
 
-func mkdirAll(dir string) error {
+func MkdirAll(dir string) error {
 	_, err := os.Stat(dir)
 
 	if err != nil {

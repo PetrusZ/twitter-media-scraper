@@ -1,6 +1,6 @@
 .PHONY: run build clean
 
-SOURCE = main.go downloader.go utils.go config.go
+SOURCE = cmd/main.go
 
 TEMP = out/BBCWorld out/wbpictures test
 

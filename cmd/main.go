@@ -9,14 +9,17 @@ import (
 	twitterscraper "github.com/n0madic/twitter-scraper"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+
+	"github.com/PetrusZ/twitter-media-scraper/internal/config"
+	"github.com/PetrusZ/twitter-media-scraper/internal/downloader"
 )
 
 func main() {
 	var configPath string
-	flag.StringVar(&configPath, "configPath", ".", "Input config file path")
+	flag.StringVar(&configPath, "configPath", "./configs", "Input config file path")
 	flag.Parse()
 
-	config, err := LoadConfig(configPath)
+	config, err := config.LoadConfig(configPath)
 	if err != nil {
 		panic(err)
 	}
@@ -42,7 +45,7 @@ func main() {
 	zerolog.SetGlobalLevel(logLevel)
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 
-	d := GetDownloaderInstance(16)
+	d := downloader.GetDownloaderInstance(16)
 
 	log.Info().Msg("Downloader starts")
 
@@ -62,7 +65,7 @@ func main() {
 	d.PrintCounter()
 }
 
-func getUserTweets(user string, amount int, getVideos bool, getPhotos bool, d Downloader) (err error) {
+func getUserTweets(user string, amount int, getVideos bool, getPhotos bool, d downloader.Downloader) (err error) {
 	log.Debug().Msgf("Downloading user %s's video = %t, photos = %t", user, getVideos, getPhotos)
 
 	scraper := twitterscraper.New()
@@ -79,14 +82,26 @@ func getUserTweets(user string, amount int, getVideos bool, getPhotos bool, d Do
 
 		if getVideos && tweet.Videos != nil {
 			for _, video := range tweet.Videos {
-				tweetInfo := tweetInfo{user, user, date + " - " + tweet.ID, video.URL, TweetTypeVideo}
+				tweetInfo := downloader.TweetInfo{
+					User:      user,
+					Dir:       user,
+					Name:      date + " - " + tweet.ID,
+					URL:       video.URL,
+					TweetType: downloader.TweetTypeVideo,
+				}
 				d.GetInfo() <- tweetInfo
 			}
 		}
 
 		if getPhotos && tweet.Videos == nil {
 			for id, url := range tweet.Photos {
-				tweetInfo := tweetInfo{user, user, date + " - " + tweet.ID + "-" + fmt.Sprint(id), url + "?format=jpg&name=orig", TweetTypePhoto}
+				tweetInfo := downloader.TweetInfo{
+					User:      user,
+					Dir:       user,
+					Name:      date + " - " + tweet.ID + "-" + fmt.Sprint(id),
+					URL:       url + "?format=jpg&name=orig",
+					TweetType: downloader.TweetTypePhoto,
+				}
 				d.GetInfo() <- tweetInfo
 			}
 		}
