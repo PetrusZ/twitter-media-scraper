@@ -6,7 +6,14 @@ import (
 	"runtime/debug"
 )
 
-var mkdirAllFunc = os.MkdirAll
+var MkdirAllFunc = os.MkdirAll
+
+func ConvertBoolToString(b bool) string {
+	if b {
+		return "successed"
+	}
+	return "failed"
+}
 
 func Mkdir(dir string) error {
 	_, err := os.Stat(dir)
@@ -25,7 +32,7 @@ func MkdirAll(dir string) error {
 	_, err := os.Stat(dir)
 
 	if err != nil {
-		err := mkdirAllFunc(dir, os.ModePerm)
+		err := MkdirAllFunc(dir, os.ModePerm)
 
 		if err != nil {
 			return err

@@ -2,7 +2,7 @@
 
 SOURCE = cmd/main.go
 
-TEMP = out/BBCWorld out/wbpictures test
+TEMP = out/BBCWorld out/wbpictures cmd/out internal/downloader/test test
 
 PROJECT = twitter-media-scraper
 
@@ -15,7 +15,7 @@ build:
 	go build -o $(PROJECT) $(SOURCE)
 
 test: clean
-	go test
+	go test -v -cover ./...
 
 clean:
 	rm -rf $(TEMP)

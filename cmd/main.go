@@ -19,7 +19,7 @@ func main() {
 	flag.StringVar(&configPath, "configPath", "./configs", "Input config file path")
 	flag.Parse()
 
-	config, err := config.LoadConfig(configPath)
+	config, err := config.Load(configPath)
 	if err != nil {
 		panic(err)
 	}

@@ -1,19 +1,8 @@
 package config
 
 import (
-	"encoding/json"
-	"io"
-	"io/ioutil"
-
 	"github.com/spf13/viper"
 )
-
-type BodyReader func(io.Reader) ([]byte, error)
-type RespUnmarshaller func([]byte, interface{}) error
-
-type ConfigFile interface {
-	GetConfigs() []Config
-}
 
 type configFile struct {
 	fileName string
@@ -39,20 +28,7 @@ type UserConfig struct {
 	GetPhotos   *bool   `mapstructure:"get_photos"`
 }
 
-var readAllFunc = ioutil.ReadAll
-var unMarshalFunc = json.Unmarshal
-
-func NewConfigFile(fileName string) ConfigFile {
-	return &configFile{
-		fileName: fileName,
-	}
-}
-
-func (c *configFile) GetConfigs() []Config {
-	return c.Configs
-}
-
-func LoadConfig(path string) (config Config, err error) {
+func Load(path string) (config Config, err error) {
 	viper.AddConfigPath(path)
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
