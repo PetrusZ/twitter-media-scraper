@@ -12,27 +12,43 @@ import (
 )
 
 func main() {
-	var configName string
-	flag.StringVar(&configName, "configFile", "config.json", "Input configFile name")
+	var configPath string
+	flag.StringVar(&configPath, "configPath", ".", "Input config file path")
 	flag.Parse()
 
-	configFile := NewConfigFile(configName)
-
-	err := configFile.Load()
+	config, err := LoadConfig(configPath)
 	if err != nil {
 		panic(err)
 	}
 
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	logLevel := zerolog.InfoLevel
+	switch *config.Global.LogLevel {
+	case "debug":
+		logLevel = zerolog.DebugLevel
+	case "info":
+		logLevel = zerolog.InfoLevel
+	case "warn":
+		logLevel = zerolog.WarnLevel
+	case "fatal":
+		logLevel = zerolog.FatalLevel
+	case "panic":
+		logLevel = zerolog.PanicLevel
+	case "no":
+		logLevel = zerolog.NoLevel
+	case "disabled":
+		logLevel = zerolog.Disabled
+	}
+
+	zerolog.SetGlobalLevel(logLevel)
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 
 	d := GetDownloaderInstance(16)
 
 	log.Info().Msg("Downloader starts")
 
-	for _, config := range configFile.GetConfigs() {
-		if config.UserName != "" {
-			err := getUserTweets(config.UserName, config.TweetAmount, config.GetVideos, config.GetPhotos, d)
+	for _, user := range config.Users {
+		if *user.UserName != "" {
+			err := getUserTweets(*user.UserName, *user.TweetAmount, *user.GetVideos, *user.GetPhotos, d)
 			if err != nil {
 				log.Error().Err(err).Msg("")
 			}

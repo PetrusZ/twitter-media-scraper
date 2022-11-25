@@ -39,6 +39,7 @@ type Downloader interface {
 	Wait()
 	GetInfo() chan tweetInfo
 	PrintCounter()
+	ClearCounter()
 	downloadFile(string, string, string) error
 }
 
@@ -186,6 +187,13 @@ func (d *downloader) PrintCounter() {
 		log.Info().Msgf("user %s downloaded %d photo(s), %d video(s), %d total",
 			userStr, counter[CounterKeyPhoto], counter[CounterKeyVideo], counter[CounterKeyTotal])
 
+		return true
+	})
+}
+
+func (d *downloader) ClearCounter() {
+	d.counter.Range(func(user, subKey interface{}) bool {
+		d.counter.Delete(user)
 		return true
 	})
 }

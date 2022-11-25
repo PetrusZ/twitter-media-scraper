@@ -4,3 +4,4 @@ test/
 .vscode
 *.old
 twitter-media-scraper
+config.yaml

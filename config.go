@@ -2,17 +2,16 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
-	"os"
+
+	"github.com/spf13/viper"
 )
 
 type BodyReader func(io.Reader) ([]byte, error)
 type RespUnmarshaller func([]byte, interface{}) error
 
 type ConfigFile interface {
-	Load() error
 	GetConfigs() []Config
 }
 
@@ -22,10 +21,22 @@ type configFile struct {
 }
 
 type Config struct {
-	UserName    string `json:"user_name"`
-	TweetAmount int    `json:"tweet_amount"`
-	GetVideos   bool   `json:"get_videos"`
-	GetPhotos   bool   `json:"get_photos"`
+	Global *GlobalConfig `mapstructure:"global"`
+	Users  []*UserConfig `mapstructure:"users"`
+}
+
+type GlobalConfig struct {
+	LogLevel    *string `mapstructure:"log_level"`
+	TweetAmount *int    `mapstructure:"tweet_amount"`
+	GetVideos   *bool   `mapstructure:"get_videos"`
+	GetPhotos   *bool   `mapstructure:"get_photos"`
+}
+
+type UserConfig struct {
+	UserName    *string `mapstructure:"username"`
+	TweetAmount *int    `mapstructure:"tweet_amount"`
+	GetVideos   *bool   `mapstructure:"get_videos"`
+	GetPhotos   *bool   `mapstructure:"get_photos"`
 }
 
 var readAllFunc = ioutil.ReadAll
@@ -41,22 +52,33 @@ func (c *configFile) GetConfigs() []Config {
 	return c.Configs
 }
 
-func (c *configFile) Load() error {
-	jsonFile, err := os.Open(c.fileName)
-	if err != nil {
-		return fmt.Errorf("os.Open(%s) error: %w", c.fileName, err)
-	}
-	defer jsonFile.Close()
+func LoadConfig(path string) (config Config, err error) {
+	viper.AddConfigPath(path)
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
 
-	byteValue, err := readAllFunc(jsonFile)
-	if err != nil {
-		return fmt.Errorf("readAllFunc error: %w", err)
-	}
+	viper.AutomaticEnv()
 
-	err = unMarshalFunc(byteValue, &c.Configs)
+	err = viper.ReadInConfig()
 	if err != nil {
-		return fmt.Errorf("unMarshalFunc error: %w", err)
+		return
 	}
 
-	return nil
+	err = viper.Unmarshal(&config)
+
+	for _, user := range config.Users {
+		if user.TweetAmount == nil {
+			user.TweetAmount = config.Global.TweetAmount
+		}
+
+		if user.GetPhotos == nil {
+			user.GetPhotos = config.Global.GetPhotos
+		}
+
+		if user.GetVideos == nil {
+			user.GetVideos = config.Global.GetVideos
+		}
+	}
+
+	return
 }
