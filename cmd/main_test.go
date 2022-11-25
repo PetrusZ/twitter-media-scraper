@@ -45,7 +45,7 @@ func TestFlags(T *testing.T) {
 		Name string
 		Args []string
 	}{
-		{"flags set", []string{"-configPath", basepath + "/../configs"}},
+		{"flags set", []string{"-configPath", basepath + "/../configs", "-isTest", "true"}},
 	}
 	for _, tc := range cases {
 		// this call is required because otherwise flags panics, if args are set between flag.Parse calls

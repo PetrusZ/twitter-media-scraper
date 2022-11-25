@@ -18,7 +18,9 @@ import (
 
 func main() {
 	var configPath string
+	var isTest bool
 	flag.StringVar(&configPath, "configPath", "./configs", "Input config file path")
+	flag.BoolVar(&isTest, "isTest", false, "whether is a test")
 	flag.Parse()
 
 	conf, err := config.Load(configPath)
@@ -73,6 +75,10 @@ func main() {
 		d.PrintCounter()
 
 		log.Info().Msg("download end")
+
+		if isTest {
+			return
+		}
 
 	SIGNAL:
 		for {
