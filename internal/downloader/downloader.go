@@ -1,6 +1,7 @@
 package downloader
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -9,6 +10,7 @@ import (
 	"os"
 	"path"
 	"sync"
+	"time"
 
 	"github.com/PetrusZ/twitter-media-scraper/internal/config"
 	"github.com/PetrusZ/twitter-media-scraper/internal/utils"
@@ -85,14 +87,26 @@ func (d *downloader) Start(count int) {
 
 			for info := range d.info {
 
-				log.Debug().Msgf("workerId %d got tweetInfo: dir %s, name %s, url %s", workerID, info.Dir, info.Name, info.URL)
+				log.Trace().Msgf("workerId %d got tweetInfo: dir %s, name %s, url %s", workerID, info.Dir, info.Name, info.URL)
 
-				err := d.downloadFile(*downloadDir+"/"+info.Dir, info.Name, info.URL)
-				if err != nil {
-					log.Error().Msgf("workerId %d got tweetInfo: dir %s, name %s, url %s", workerID, info.Dir, info.Name, info.URL)
-					log.Error().Msgf("Error: %s", err)
-				} else {
-					d.increaseCounter(info.User, info.TweetType)
+				done := make(chan error, 1)
+				ctx, cancel := context.WithTimeout(context.Background(), time.Second*60*3)
+				defer cancel()
+
+				utils.Go(func() {
+					done <- d.downloadFile(*downloadDir+"/"+info.Dir, info.Name, info.URL)
+				})
+
+				select {
+				case err := <-done:
+					if err != nil {
+						log.Error().Err(err).Msgf("workerId %d got tweetInfo: dir %s, name %s, url %s", workerID, info.Dir, info.Name, info.URL)
+					} else {
+						d.increaseCounter(info.User, info.TweetType)
+					}
+					log.Trace().Err(err).Msgf("worker id %d download finish: dir %s, name %s, url %s", workerID, info.Dir, info.Name, info.URL)
+				case <-ctx.Done():
+					log.Error().Msgf("download worker id %d context timeout: dir %s, name %s, url %s", workerID, info.Dir, info.Name, info.URL)
 				}
 
 			}
