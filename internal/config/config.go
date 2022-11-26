@@ -12,15 +12,21 @@ import (
 var config Config
 
 type Config struct {
-	Global *GlobalConfig `mapstructure:"global"`
-	Users  []*UserConfig `mapstructure:"users"`
+	LogLevel    *string       `mapstructure:"log_level"`
+	KeepRunning *bool         `mapstructure:"keep_running"`
+	Global      *GlobalConfig `mapstructure:"global"`
+	Users       []*UserConfig `mapstructure:"users"`
 }
 
 type GlobalConfig struct {
-	LogLevel    *string `mapstructure:"log_level"`
-	TweetAmount *int    `mapstructure:"tweet_amount"`
-	GetVideos   *bool   `mapstructure:"get_videos"`
-	GetPhotos   *bool   `mapstructure:"get_photos"`
+	LogLevel              *string `mapstructure:"log_level"`
+	TweetAmount           *int    `mapstructure:"tweet_amount"`
+	GetVideos             *bool   `mapstructure:"get_videos"`
+	GetPhotos             *bool   `mapstructure:"get_photos"`
+	KeepRunning           *bool   `mapstructure:"keep_running"`
+	ConfigPath            *string `mapstructure:"config_path"`
+	DownloadDir           *string `mapstructure:"download_dir"`
+	DownloaderInstanceNum *int    `mapstructure:"downloader_instance_num"`
 }
 
 type UserConfig struct {

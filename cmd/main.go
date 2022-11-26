@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"os"
 	"syscall"
@@ -10,6 +9,8 @@ import (
 	twitterscraper "github.com/n0madic/twitter-scraper"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	flag "github.com/spf13/pflag"
+	"github.com/spf13/viper"
 
 	"github.com/PetrusZ/twitter-media-scraper/internal/config"
 	"github.com/PetrusZ/twitter-media-scraper/internal/downloader"
@@ -17,38 +18,43 @@ import (
 )
 
 func main() {
-	var configPath string
-	var isTest bool
-	flag.StringVar(&configPath, "configPath", "./configs", "Input config file path")
-	flag.BoolVar(&isTest, "isTest", false, "whether is a test")
+	flag.String("log_level", "info", "log level")
+	flag.String("config_path", "./configs", "config file path")
+	flag.Bool("keep_running", true, "whether keep running all the time")
 	flag.Parse()
+
+	viper.BindPFlags(flag.CommandLine)
+	configPath := viper.GetString("config_path")
 
 	conf, err := config.Load(configPath)
 	if err != nil {
 		panic(err)
 	}
 
+	keepRunning := viper.GetBool("keep_running")
+	logLevel := viper.GetString("log_level")
+
 	config.Watch()
 
-	logLevel := zerolog.InfoLevel
-	switch *conf.Global.LogLevel {
+	zeroLogLevel := zerolog.InfoLevel
+	switch logLevel {
 	case "debug":
-		logLevel = zerolog.DebugLevel
+		zeroLogLevel = zerolog.DebugLevel
 	case "info":
-		logLevel = zerolog.InfoLevel
+		zeroLogLevel = zerolog.InfoLevel
 	case "warn":
-		logLevel = zerolog.WarnLevel
+		zeroLogLevel = zerolog.WarnLevel
 	case "fatal":
-		logLevel = zerolog.FatalLevel
+		zeroLogLevel = zerolog.FatalLevel
 	case "panic":
-		logLevel = zerolog.PanicLevel
+		zeroLogLevel = zerolog.PanicLevel
 	case "no":
-		logLevel = zerolog.NoLevel
+		zeroLogLevel = zerolog.NoLevel
 	case "disabled":
-		logLevel = zerolog.Disabled
+		zeroLogLevel = zerolog.Disabled
 	}
 
-	zerolog.SetGlobalLevel(logLevel)
+	zerolog.SetGlobalLevel(zeroLogLevel)
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 
 	utils.Sigs = make(chan os.Signal)
@@ -76,7 +82,7 @@ func main() {
 
 		log.Info().Msg("download end")
 
-		if isTest {
+		if keepRunning {
 			return
 		}
 
