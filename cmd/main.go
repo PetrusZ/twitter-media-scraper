@@ -58,7 +58,7 @@ func main() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 
 	utils.Sigs = make(chan os.Signal)
-	d := downloader.GetDownloaderInstance(*conf.Global.DownloaderInstanceNum)
+	d := downloader.GetDownloaderInstance(*conf.DownloaderInstanceNum)
 
 	log.Info().Msg("Downloader starts")
 

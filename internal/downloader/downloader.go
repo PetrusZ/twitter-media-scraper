@@ -68,7 +68,7 @@ func (d *downloader) GetInfo() chan TweetInfo {
 }
 
 func (d *downloader) Start(count int) {
-	downloadDir := config.Get().Global.DownloadDir
+	downloadDir := config.Get().DownloadDir
 	if downloadDir == nil {
 		log.Error().Msg("download dir is nil")
 		return

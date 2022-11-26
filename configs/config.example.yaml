@@ -1,8 +1,9 @@
 log_level: info
 keep_running: true
+download_dir: out
+downloader_instance_num: 16
+crons: '0 0 0 * * *'
 global:
-  download_dir: out
-  downloader_instance_num: 16
   get_videos: true
   get_photos: true
   tweet_amount: 1000
