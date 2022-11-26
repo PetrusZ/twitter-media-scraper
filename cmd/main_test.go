@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/PetrusZ/twitter-media-scraper/internal/config"
 	"github.com/PetrusZ/twitter-media-scraper/internal/downloader"
 	"github.com/PetrusZ/twitter-media-scraper/internal/utils"
 )
@@ -22,6 +23,14 @@ func TestGetUserTweets(t *testing.T) {
 		{"BBCWorld", 0, true},
 		{"wbpictures", 50, true},
 		{"", 50, false},
+	}
+
+	_, b, _, _ := runtime.Caller(0)
+	basepath := filepath.Dir(b)
+	configPath := basepath + "/../configs"
+	_, err := config.Load(configPath)
+	if err != nil {
+		t.Errorf("load config from %s error: %s", configPath, err)
 	}
 
 	d := downloader.GetDownloaderInstance(16)
@@ -45,7 +54,7 @@ func TestFlags(T *testing.T) {
 		Name string
 		Args []string
 	}{
-		{"flags set", []string{"-configPath", basepath + "/../configs", "-isTest", "true"}},
+		{"flags set", []string{"--config_path=" + basepath + "/../configs", "--keep_running=false"}},
 	}
 	for _, tc := range cases {
 		// this call is required because otherwise flags panics, if args are set between flag.Parse calls
