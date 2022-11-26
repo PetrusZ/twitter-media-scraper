@@ -35,29 +35,8 @@ func main() {
 
 	keepRunning := viper.GetBool("keep_running")
 	logLevel := viper.GetString("log_level")
-
 	config.Watch()
-
-	zeroLogLevel := zerolog.InfoLevel
-	switch logLevel {
-	case "debug":
-		zeroLogLevel = zerolog.DebugLevel
-	case "info":
-		zeroLogLevel = zerolog.InfoLevel
-	case "warn":
-		zeroLogLevel = zerolog.WarnLevel
-	case "fatal":
-		zeroLogLevel = zerolog.FatalLevel
-	case "panic":
-		zeroLogLevel = zerolog.PanicLevel
-	case "no":
-		zeroLogLevel = zerolog.NoLevel
-	case "disabled":
-		zeroLogLevel = zerolog.Disabled
-	}
-
-	zerolog.SetGlobalLevel(zeroLogLevel)
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
+	setLogLevel(logLevel)
 
 	utils.Sigs = make(chan os.Signal)
 	d := downloader.GetDownloaderInstance(*conf.DownloaderInstanceNum)
@@ -99,12 +78,14 @@ func main() {
 				switch sig {
 				case syscall.SIGHUP:
 					conf, err = config.Load(configPath)
-					log.Info().Msg("config reloaded")
 					if err != nil {
 						log.Error().Err(err).Msg("reload config error")
 					} else {
 						sched.Clear()
 						startCron(sched, *conf.Cron)
+						setLogLevel(*conf.LogLevel)
+
+						log.Info().Msg("config reloaded")
 
 						break SIGNAL
 					}
@@ -115,10 +96,36 @@ func main() {
 		}
 
 		d.Init()
+		d.Start(*conf.DownloaderInstanceNum)
 	}
 
 EXIT:
 	sched.Stop()
+}
+
+func setLogLevel(logLevel string) {
+	zeroLogLevel := zerolog.InfoLevel
+	switch logLevel {
+	case "trace":
+		zeroLogLevel = zerolog.TraceLevel
+	case "debug":
+		zeroLogLevel = zerolog.DebugLevel
+	case "info":
+		zeroLogLevel = zerolog.InfoLevel
+	case "warn":
+		zeroLogLevel = zerolog.WarnLevel
+	case "fatal":
+		zeroLogLevel = zerolog.FatalLevel
+	case "panic":
+		zeroLogLevel = zerolog.PanicLevel
+	case "no":
+		zeroLogLevel = zerolog.NoLevel
+	case "disabled":
+		zeroLogLevel = zerolog.Disabled
+	}
+
+	zerolog.SetGlobalLevel(zeroLogLevel)
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 }
 
 func getUserTweets(user string, amount int, getVideos bool, getPhotos bool, d downloader.Downloader) (err error) {
