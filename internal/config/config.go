@@ -36,6 +36,10 @@ type UserConfig struct {
 	GetPhotos   *bool   `mapstructure:"get_photos"`
 }
 
+func Get() Config {
+	return config
+}
+
 func Load(path string) (Config, error) {
 	viper.AddConfigPath(path)
 	viper.SetConfigName("config")

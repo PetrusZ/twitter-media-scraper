@@ -9,6 +9,7 @@ import (
 	"path"
 	"sync"
 
+	"github.com/PetrusZ/twitter-media-scraper/internal/config"
 	"github.com/PetrusZ/twitter-media-scraper/internal/utils"
 	"github.com/rs/zerolog/log"
 )
@@ -67,6 +68,12 @@ func (d *downloader) GetInfo() chan TweetInfo {
 }
 
 func (d *downloader) Start(count int) {
+	downloadDir := config.Get().Global.DownloadDir
+	if downloadDir == nil {
+		log.Error().Msg("download dir is nil")
+		return
+	}
+
 	for i := 0; i < count; i++ {
 		workerID := i
 		d.wg.Add(1)
@@ -79,7 +86,7 @@ func (d *downloader) Start(count int) {
 
 				log.Debug().Msgf("workerId %d got tweetInfo: dir %s, name %s, url %s", workerID, info.Dir, info.Name, info.URL)
 
-				err := d.downloadFile("out/"+info.Dir, info.Name, info.URL)
+				err := d.downloadFile(*downloadDir+"/"+info.Dir, info.Name, info.URL)
 				if err != nil {
 					log.Error().Msgf("workerId %d got tweetInfo: dir %s, name %s, url %s", workerID, info.Dir, info.Name, info.URL)
 					log.Error().Msgf("Error: %s", err)
