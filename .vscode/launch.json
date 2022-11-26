@@ -12,8 +12,9 @@
             "program": "${workspaceFolder}/cmd",
             "env": {},
             "args": [
-                "--config_path", "../configs",
-                // "--keep_running", "false",
+                "--config_path=../configs",
+                "--keep_running=false",
+                // "--log_level=debug",
             ]
         }
     ]

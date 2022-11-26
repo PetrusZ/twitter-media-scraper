@@ -1,6 +1,7 @@
 package downloader
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -105,25 +106,33 @@ func (d *downloader) Wait() {
 }
 
 func (d *downloader) downloadFile(dir, name, downloadURL string) error {
+	parsedURL, err := url.Parse(downloadURL)
+	if err != nil {
+		return fmt.Errorf("url.Parse(%s) error: %w", downloadURL, err)
+	}
+
+	fileName := dir + "/" + name + path.Ext(parsedURL.Path)
+	_, err = os.Stat(fileName)
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("os.Stat(%s) error: %w", fileName, err)
+	} else if err == nil {
+		return nil
+	}
+
 	resp, err := http.Get(downloadURL)
 	if err != nil {
 		return fmt.Errorf("http.Get(%s) error: %w", downloadURL, err)
 	}
 	defer resp.Body.Close()
 
-	parsedURL, err := url.Parse(downloadURL)
-	if err != nil {
-		return fmt.Errorf("url.Parse(%s) error: %w", downloadURL, err)
-	}
-
 	err = utils.MkdirAll(dir + "/")
 	if err != nil {
 		return fmt.Errorf("mkdirAll(%s) error: %w", dir+"/", err)
 	}
 
-	f, err := os.Create(dir + "/" + name + path.Ext(parsedURL.Path))
+	f, err := os.Create(fileName)
 	if err != nil {
-		return fmt.Errorf("os.Create(%s) error: %w", dir+"/"+name+path.Ext(parsedURL.Path), err)
+		return fmt.Errorf("os.Create(%s) error: %w", fileName, err)
 	}
 	defer f.Close()
 
