@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"os"
 	"syscall"
+	"time"
 
 	twitterscraper "github.com/n0madic/twitter-scraper"
+	"github.com/reugn/go-quartz/quartz"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	flag "github.com/spf13/pflag"
@@ -60,6 +62,10 @@ func main() {
 	utils.Sigs = make(chan os.Signal)
 	d := downloader.GetDownloaderInstance(*conf.DownloaderInstanceNum)
 
+	sched := quartz.NewStdScheduler()
+	sched.Start()
+	startCron(sched, *conf.Cron)
+
 	log.Info().Msg("Downloader starts")
 
 	for {
@@ -82,28 +88,37 @@ func main() {
 
 		log.Info().Msg("download end")
 
-		if keepRunning {
-			return
+		if !keepRunning {
+			goto EXIT
 		}
 
 	SIGNAL:
 		for {
 			select {
 			case sig := <-utils.Sigs:
-				if sig == syscall.SIGHUP {
+				switch sig {
+				case syscall.SIGHUP:
 					conf, err = config.Load(configPath)
 					log.Info().Msg("config reloaded")
 					if err != nil {
 						log.Error().Err(err).Msg("reload config error")
 					} else {
+						sched.Clear()
+						startCron(sched, *conf.Cron)
+
 						break SIGNAL
 					}
+				case syscall.SIGALRM:
+					break SIGNAL
 				}
 			}
 		}
 
 		d.Init()
 	}
+
+EXIT:
+	sched.Stop()
 }
 
 func getUserTweets(user string, amount int, getVideos bool, getPhotos bool, d downloader.Downloader) (err error) {
@@ -149,4 +164,18 @@ func getUserTweets(user string, amount int, getVideos bool, getPhotos bool, d do
 	}
 
 	return err
+}
+
+func startCron(sched *quartz.StdScheduler, cron string) error {
+	cronTrigger, _ := quartz.NewCronTrigger(cron)
+	functionJob := quartz.NewFunctionJob(
+		func() (int, error) {
+			utils.Sigs <- syscall.SIGALRM
+			log.Info().Msgf("cron job triggered at %v!", time.Now().String())
+			return 0, nil
+		},
+	)
+	sched.ScheduleJob(functionJob, cronTrigger)
+
+	return nil
 }
