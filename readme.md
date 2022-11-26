@@ -4,10 +4,29 @@
 
 # Intro
 
-Scrape/Craw twitter user's pictures and videos by username.
+Scrape/Craw twitter users' pictures and videos by username.
+
+# Feature
+
+* Automaticly reload config when config file change
+* Support cron job to schedule download
+* Support deploy by docker
 
 # Usage
+
+## Build from source
 
 1. mv `configs/config.example.yaml` to `configs/config.yaml`
 1. Edit `config.yaml`
 2. `make run`
+
+## Docker
+
+``` sh
+docker run -d \
+  --name twitter-media-scraper \
+  -v /path/to/out:/cmd/out \
+  -v /path/to/configs:/cmd/configs \
+  --restart=always \
+  patrickz07/twitter-media-scraper:latest
+```
