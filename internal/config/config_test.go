@@ -16,7 +16,7 @@ func TestLoad(t *testing.T) {
 		path     string
 		expected bool
 	}{
-		{basepath + "configs", false},
+		{basepath + "/configs", false},
 		{basepath + "/../../configs", true},
 	}
 

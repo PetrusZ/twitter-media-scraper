@@ -1,0 +1,9 @@
+out/
+cmd/out/
+test/
+internal/downloader/test/
+internal/utils/test/
+configs/config.yaml
+.idea
+*.old
+twitter-media-scraper
