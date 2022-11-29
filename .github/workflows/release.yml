@@ -63,7 +63,7 @@ jobs:
       - name: Docker build and push to DockerHub
         env:
           REGISTRY: patrickz07
-          REPOSITORY: simple-bank
+          REPOSITORY: twitter-media-scraper
         run: |
           echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u $REGISTRY --password-stdin
           docker build -f build/package/Dockerfile -t $REGISTRY/$REPOSITORY:${{ steps.vars.outputs.tag }} -t $REGISTRY/$REPOSITORY:latest .
