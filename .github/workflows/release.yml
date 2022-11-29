@@ -27,7 +27,7 @@ jobs:
 
       - name: Test
         run: |
-          mv configs/config.example.yaml configs/config.yaml
+          cp configs/config.example.yaml configs/config.yaml
           go test -cover ./... -race
 
       - name: Install git-chglog
