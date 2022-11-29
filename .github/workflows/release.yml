@@ -13,8 +13,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set env
-        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - name: Set output
+        id: vars
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
 
       - name: Set up Go
         uses: actions/setup-go@v2
@@ -38,11 +39,11 @@ jobs:
 
       - name: Zip
         run: |
-          zip -r twitter-media-scraper.linux-amd64-${RELEASE_VERSION}.zip twitter-media-scraper.linux-amd64 configs
-          zip -r twitter-media-scraper.linux-arm-${RELEASE_VERSION}.zip twitter-media-scraper.linux-arm configs
-          zip -r twitter-media-scraper.linux-arm64-${RELEASE_VERSION}.zip twitter-media-scraper.linux-arm64 configs
-          zip -r twitter-media-scraper.windows-amd64-${RELEASE_VERSION}.zip twitter-media-scraper.windows-amd64 configs
-          zip -r twitter-media-scraper.darwin-amd64-${RELEASE_VERSION}.zip twitter-media-scraper.darwin-amd64 configs
+          zip -r twitter-media-scraper.linux-amd64-${{ steps.vars.outputs.tag }}.zip twitter-media-scraper.linux-amd64 configs
+          zip -r twitter-media-scraper.linux-arm-${{ steps.vars.outputs.tag }}.zip twitter-media-scraper.linux-arm configs
+          zip -r twitter-media-scraper.linux-arm64-${{ steps.vars.outputs.tag }}.zip twitter-media-scraper.linux-arm64 configs
+          zip -r twitter-media-scraper.windows-amd64-${{ steps.vars.outputs.tag }}.zip twitter-media-scraper.windows-amd64 configs
+          zip -r twitter-media-scraper.darwin-amd64-${{ steps.vars.outputs.tag }}.zip twitter-media-scraper.darwin-amd64 configs
 
       - name: Release
         uses: softprops/action-gh-release@v1
@@ -51,11 +52,11 @@ jobs:
           body_path: CHANGELOG.md
           token: ${{ secrets.RELEASE_UPLOAD_TOKEN }}
           files: |
-            twitter-media-scraper.linux-amd64-${RELEASE_VERSION}.zip
-            twitter-media-scraper.linux-arm-${RELEASE_VERSION}.zip
-            twitter-media-scraper.linux-arm64-${RELEASE_VERSION}.zip
-            twitter-media-scraper.windows-amd64-${RELEASE_VERSION}.zip
-            twitter-media-scraper.darwin-amd64-${RELEASE_VERSION}.zip
+            twitter-media-scraper.linux-amd64-${{ steps.vars.outputs.tag }}.zip
+            twitter-media-scraper.linux-arm-${{ steps.vars.outputs.tag }}.zip
+            twitter-media-scraper.linux-arm64-${{ steps.vars.outputs.tag }}.zip
+            twitter-media-scraper.windows-amd64-${{ steps.vars.outputs.tag }}.zip
+            twitter-media-scraper.darwin-amd64-${{ steps.vars.outputs.tag }}.zip
         env:
           GITHUB_REPOSITORY: PetrusZ/twitter-media-scraper
 
@@ -65,5 +66,5 @@ jobs:
           REPOSITORY: simple-bank
         run: |
           echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u $REGISTRY --password-stdin
-          docker build -t $REGISTRY/$REPOSITORY:$RELEASE_VERSION -t $REGISTRY/$REPOSITORY:latest .
+          docker build -f build/package/Dockerfile -t $REGISTRY/$REPOSITORY:${{ steps.vars.outputs.tag }} -t $REGISTRY/$REPOSITORY:latest .
           docker push -a $REGISTRY/$REPOSITORY
