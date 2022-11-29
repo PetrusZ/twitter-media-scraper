@@ -27,7 +27,7 @@ jobs:
           go test -cover ./... -race
 
       - name: Install git-chglog
-        uses: actions/setup-go@v2
+        uses: actions/install-git-chglog@v1
 
       - name: Generate Changelog
         run: |
