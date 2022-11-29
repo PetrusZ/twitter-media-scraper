@@ -38,24 +38,24 @@ jobs:
 
       - name: Zip
         run: |
-          zip -r twitter-media-scraper.linux-amd64-$RELEASE_VERSION.zip twitter-media-scraper.linux-amd64 configs
-          zip -r twitter-media-scraper.linux-arm-$RELEASE_VERSION.zip twitter-media-scraper.linux-arm configs
-          zip -r twitter-media-scraper.linux-arm64-$RELEASE_VERSION.zip twitter-media-scraper.linux-arm64 configs
-          zip -r twitter-media-scraper.windows-amd64-$RELEASE_VERSION.zip twitter-media-scraper.windows-amd64 configs
-          zip -r twitter-media-scraper.darwin-amd64-$RELEASE_VERSION.zip twitter-media-scraper.darwin-amd64 configs
+          zip -r twitter-media-scraper.linux-amd64-${RELEASE_VERSION}.zip twitter-media-scraper.linux-amd64 configs
+          zip -r twitter-media-scraper.linux-arm-${RELEASE_VERSION}.zip twitter-media-scraper.linux-arm configs
+          zip -r twitter-media-scraper.linux-arm64-${RELEASE_VERSION}.zip twitter-media-scraper.linux-arm64 configs
+          zip -r twitter-media-scraper.windows-amd64-${RELEASE_VERSION}.zip twitter-media-scraper.windows-amd64 configs
+          zip -r twitter-media-scraper.darwin-amd64-${RELEASE_VERSION}.zip twitter-media-scraper.darwin-amd64 configs
 
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          body_path: $CHANGELOG.md
+          body_path: CHANGELOG.md
           token: ${{ secrets.RELEASE_UPLOAD_TOKEN }}
           files: |
-            twitter-media-scraper.linux-amd64-$RELEASE_VERSION.zip
-            twitter-media-scraper.linux-arm-$RELEASE_VERSION.zip
-            twitter-media-scraper.linux-arm64-$RELEASE_VERSION.zip
-            twitter-media-scraper.windows-amd64-$RELEASE_VERSION.zip
-            twitter-media-scraper.darwin-amd64-$RELEASE_VERSION.zip
+            twitter-media-scraper.linux-amd64-${RELEASE_VERSION}.zip
+            twitter-media-scraper.linux-arm-${RELEASE_VERSION}.zip
+            twitter-media-scraper.linux-arm64-${RELEASE_VERSION}.zip
+            twitter-media-scraper.windows-amd64-${RELEASE_VERSION}.zip
+            twitter-media-scraper.darwin-amd64-${RELEASE_VERSION}.zip
         env:
           GITHUB_REPOSITORY: PetrusZ/twitter-media-scraper
 
