@@ -1,6 +1,10 @@
 name: Release
 
-on: push
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - "v*" # Push events to matching v*, i.e. v1.0, v20.15.10
 
 jobs:
   build:
@@ -22,9 +26,11 @@ jobs:
           mv configs/config.example.yaml configs/config.yaml
           go test -cover ./... -race
 
+      - name: Install git-chglog
+        uses: actions/setup-go@v2
+
       - name: Generate Changelog
         run: |
-          go get -u github.com/git-chglog/git-chglog/cmd/git-chglog
           git-chglog -o CHANGELOG.md
 
       - name: Zip
