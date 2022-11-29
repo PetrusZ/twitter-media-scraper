@@ -2,4 +2,4 @@ out/
 test/
 .idea
 *.old
-twitter-media-scraper
+twitter-media-scraper*

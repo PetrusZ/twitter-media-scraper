@@ -14,11 +14,18 @@ run:
 build:
 	go build -o $(PROJECT) $(SOURCE)
 
+build_all:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o $(PROJECT).linux-amd64 $(SOURCE)
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm go build -o $(PROJECT).linux-arm $(SOURCE)
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o $(PROJECT).linux-arm64 $(SOURCE)
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o $(PROJECT).windows-amd64 $(SOURCE)
+	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o $(PROJECT).darwin-amd64 $(SOURCE)
+
 test: clean
 	go test -v -cover ./...
 
 clean:
-	rm -rf $(TEMP)
+	rm -rf $(TEMP) $(PROJECT)*
 
 clean_debug:
 	rm -rf cmd/out

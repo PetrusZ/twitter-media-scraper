@@ -125,7 +125,7 @@ func setLogLevel(logLevel string) {
 	}
 
 	zerolog.SetGlobalLevel(zeroLogLevel)
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339})
 }
 
 func getUserTweets(user string, amount int, getVideos bool, getPhotos bool, d downloader.Downloader) (err error) {
