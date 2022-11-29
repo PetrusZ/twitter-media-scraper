@@ -25,6 +25,8 @@ Scrape/Craw twitter users' pictures and videos by username.
 ``` sh
 docker run -d \
   --name twitter-media-scraper \
+  -v /etc/timezone:/etc/timezone:ro \
+▎ -v /etc/localtime:/etc/localtime:ro \
   -v /path/to/out:/cmd/out \
   -v /path/to/configs:/cmd/configs \
   --restart=always \
