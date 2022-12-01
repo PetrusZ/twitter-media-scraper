@@ -5,6 +5,8 @@ import (
 	"io/fs"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 var testDir = "test"
@@ -104,7 +106,7 @@ func TestGo(t *testing.T) {
 
 func TestConvertBoolToString(t *testing.T) {
 	var tests = []struct {
-		b       bool
+		b        bool
 		expected string
 	}{
 		{true, "successed"},
@@ -117,4 +119,30 @@ func TestConvertBoolToString(t *testing.T) {
 			t.Errorf("ConvertBoolToString(%v): actual = %s, expected %s", tt.b, actual, tt.expected)
 		}
 	}
+}
+
+func TestCreate(t *testing.T) {
+	testCases := []struct {
+		name     string
+		path     string
+		expected bool
+	}{
+		{"OK", "foo", true},
+		{"Err", "foo", false},
+	}
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			err := Create(tc.path)
+			if tc.expected == true {
+				require.NoError(t, err)
+			} else {
+				require.Error(t, err)
+			}
+		})
+	}
+
+	err := os.Remove(testCases[0].path)
+	require.NoError(t, err)
 }

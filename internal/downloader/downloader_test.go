@@ -4,9 +4,13 @@ import (
 	"errors"
 	"io/fs"
 	"os"
+	"path/filepath"
+	"runtime"
 	"testing"
 
+	"github.com/PetrusZ/twitter-media-scraper/internal/config"
 	"github.com/PetrusZ/twitter-media-scraper/internal/utils"
+	"github.com/stretchr/testify/require"
 )
 
 var testDir = "test"
@@ -37,22 +41,28 @@ func TestDownloadFile(t *testing.T) {
 		{"baidu", "baidu", "index", false},
 	}
 
+	_, b, _, _ := runtime.Caller(0)
+	basepath := filepath.Dir(b)
+	configPath := basepath + "/../../configs"
+	_, err := config.Load(configPath)
+	require.NoError(t, err)
+
 	d := GetDownloaderInstance(16)
 	for _, tt := range tests {
 		actual := d.downloadFile(testDir+"/"+tt.dir, tt.name, tt.fileURL)
 		if !(tt.expected == true && actual == nil) && !(tt.expected == false && actual != nil) {
-			t.Errorf("downloadFile(%s, %s, %s): err = %s, expected %s", tt.dir, tt.fileURL, tt.name, actual, utils.ConvertBoolToString(tt.expected))
+			t.Errorf("downloadFile(%s, %s, %s): err = %v, expected %s", tt.dir, tt.fileURL, tt.name, actual, utils.ConvertBoolToString(tt.expected))
 		}
 	}
 
 	setupMkdirAll()
 
-	err := d.downloadFile(testDir+"/testDownloadFile", "index", "http://www.baidu.com")
-	if err == nil {
-		t.Error("downloadFile expected err, but got nil")
-	}
+	err = d.downloadFile(testDir+"/testDownloadFile", "index", "http://www.baidu.com")
+	require.Error(t, err)
 
 	cleanupMkdirAll()
+
+	os.RemoveAll(testDir)
 }
 
 func TestParallelDownloadFile(t *testing.T) {

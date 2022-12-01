@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"runtime/debug"
@@ -55,4 +56,22 @@ func Go(fn func()) {
 
 		fn()
 	}()
+}
+
+func Create(path string) error {
+	_, err := os.Stat(path)
+	if err == nil {
+		return fmt.Errorf("file already exist: %s", path)
+	}
+	if !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	return nil
 }
