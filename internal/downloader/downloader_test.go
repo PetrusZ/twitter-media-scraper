@@ -1,7 +1,9 @@
 package downloader
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -10,6 +12,7 @@ import (
 
 	"github.com/PetrusZ/twitter-media-scraper/internal/config"
 	"github.com/PetrusZ/twitter-media-scraper/internal/utils"
+	twitterscraper "github.com/n0madic/twitter-scraper"
 	"github.com/stretchr/testify/require"
 )
 
@@ -104,4 +107,57 @@ func TestParallelDownloadFile(t *testing.T) {
 			t.Errorf("downloadFile(%s, %s, %s): downloadFile size not equal, one is %d, another is %d", tt.dir, tt.fileURL, tt.name, fileSize, size)
 		}
 	}
+}
+
+func TestDownloader(t *testing.T) {
+	_, b, _, _ := runtime.Caller(0)
+	basepath := filepath.Dir(b)
+	configPath := basepath + "/../../configs"
+	conf, err := config.Load(configPath)
+	require.NoError(t, err)
+	require.NotEmpty(t, conf)
+
+	d := GetDownloaderInstance(*conf.DownloaderInstanceNum)
+
+	user := "BBCWorld"
+	scraper := twitterscraper.New()
+	// scraper.WithDelay(60)
+	tweets := scraper.GetTweets(context.Background(), user, 100)
+
+	for tweet := range tweets {
+		require.NoError(t, tweet.Error)
+		date := fmt.Sprintf("%d%02d%02d", tweet.TimeParsed.Year(), tweet.TimeParsed.Month(), tweet.TimeParsed.Day())
+
+		if tweet.Videos != nil {
+			for _, video := range tweet.Videos {
+				tweetInfo := TweetInfo{
+					User:      user,
+					Dir:       user,
+					Name:      date + " - " + tweet.ID,
+					URL:       video.URL,
+					TweetType: TweetTypeVideo,
+				}
+				d.GetInfo() <- tweetInfo
+			}
+		}
+
+		if tweet.Videos == nil {
+			for id, url := range tweet.Photos {
+				tweetInfo := TweetInfo{
+					User:      user,
+					Dir:       user,
+					Name:      date + " - " + tweet.ID + "-" + fmt.Sprint(id),
+					URL:       url + "?format=jpg&name=orig",
+					TweetType: TweetTypePhoto,
+				}
+				d.GetInfo() <- tweetInfo
+			}
+		}
+	}
+
+	close(d.GetInfo())
+	d.Wait()
+	d.PrintCounter()
+
+	d.Init()
 }
