@@ -101,3 +101,20 @@ func TestGo(t *testing.T) {
 		Go(tt.fn)
 	}
 }
+
+func TestConvertBoolToString(t *testing.T) {
+	var tests = []struct {
+		b       bool
+		expected string
+	}{
+		{true, "successed"},
+		{false, "failed"},
+	}
+
+	for _, tt := range tests {
+		actual := ConvertBoolToString(tt.b)
+		if tt.expected != actual {
+			t.Errorf("ConvertBoolToString(%v): actual = %s, expected %s", tt.b, actual, tt.expected)
+		}
+	}
+}
