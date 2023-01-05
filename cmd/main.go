@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path"
 	"syscall"
 	"time"
 
@@ -158,11 +159,20 @@ func getUserTweets(user string, amount int, getVideos bool, getPhotos bool, d do
 
 		if getPhotos && tweet.Videos == nil {
 			for id, url := range tweet.Photos {
+				fileType := path.Ext(url)
+				switch fileType {
+				case ".jpg":
+					url = url + "?format=jpg&name=orig"
+				case ".png":
+					url = url + "?format=png&name=orig"
+				default:
+					// url = url + "?name=orig"
+				}
 				tweetInfo := downloader.TweetInfo{
 					User:      user,
 					Dir:       user,
 					Name:      date + " - " + tweet.ID + "-" + fmt.Sprint(id),
-					URL:       url + "?format=jpg&name=orig",
+					URL:       url,
 					TweetType: downloader.TweetTypePhoto,
 				}
 				d.GetInfo() <- tweetInfo
