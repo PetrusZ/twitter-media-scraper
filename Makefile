@@ -9,7 +9,7 @@ PROJECT = twitter-media-scraper
 all: run
 
 run:
-	go run $(SOURCE) --keep_running=false
+	go run $(SOURCE) --keep_running=false --log_level=info
 
 build:
 	go build -o $(PROJECT) $(SOURCE)
