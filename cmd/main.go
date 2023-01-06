@@ -166,7 +166,10 @@ func getUserTweets(user string, amount int, getVideos bool, getPhotos bool, d do
 				case ".png":
 					url = url + "?format=png&name=orig"
 				case "":
+					log.Error().Msgf("got empty ext: %s", url)
+				default:
 					url = url + "?name=orig"
+					log.Warn().Str("ext", fileType).Msg("unknow file type")
 				}
 				tweetInfo := downloader.TweetInfo{
 					User:      user,
