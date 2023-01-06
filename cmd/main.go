@@ -165,8 +165,8 @@ func getUserTweets(user string, amount int, getVideos bool, getPhotos bool, d do
 					url = url + "?format=jpg&name=orig"
 				case ".png":
 					url = url + "?format=png&name=orig"
-				default:
-					// url = url + "?name=orig"
+				case "":
+					url = url + "?name=orig"
 				}
 				tweetInfo := downloader.TweetInfo{
 					User:      user,
