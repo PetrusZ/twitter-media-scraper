@@ -37,7 +37,7 @@ jobs:
 
       - name: Generate Changelog
         run: |
-          git-chglog -o CHANGELOG.md
+          git-chglog ${{ steps.vars.outputs.tag }} > CHANGELOG-${{ steps.vars.outputs.tag }}.md
 
       - name: Zip
         run: |
@@ -51,7 +51,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          body_path: CHANGELOG.md
+          body_path: CHANGELOG-${{ steps.vars.outputs.tag }}.md
           token: ${{ secrets.RELEASE_UPLOAD_TOKEN }}
           files: |
             twitter-media-scraper.linux-amd64-${{ steps.vars.outputs.tag }}.zip
