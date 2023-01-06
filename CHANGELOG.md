@@ -1,9 +1,35 @@
 
+<a name="v0.1.1"></a>
+## [v0.1.1](https://github.com/PetrusZ/twitter-media-scraper/compare/v0.1.0...v0.1.1) (2023-01-06)
+
+### Chore
+
+* use cp instead of mv in release ci
+
+### Doc
+
+* fix README typo
+* update README
+
+### Feat
+
+* add more unit test for downloader
+* add more unit test
+* add TestConvertBoolToString in utils_test
+
+### Fix
+
+* improve ext issue
+* empty ext condition
+* download wrong photo format, fix [#1](https://github.com/PetrusZ/twitter-media-scraper/issues/1)
+
+
 <a name="v0.1.0"></a>
 ## v0.1.0 (2022-11-29)
 
 ### Chore
 
+* use right repo in ci
 * fix ci
 * fix ci
 * set RELEASE_VERSION in release ci
