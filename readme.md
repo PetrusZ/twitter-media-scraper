@@ -11,6 +11,7 @@ Scrape/Craw twitter users' pictures and videos by username.
 * Automaticly reload config when config file change
 * Support cron job to schedule download
 * Support deploy by docker
+* Skip downloading if file already exist
 
 # Usage
 
