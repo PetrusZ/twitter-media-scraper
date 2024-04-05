@@ -142,12 +142,12 @@ func TestDownloader(t *testing.T) {
 		}
 
 		if tweet.Videos == nil {
-			for id, url := range tweet.Photos {
+			for _, photo := range tweet.Photos {
 				tweetInfo := TweetInfo{
 					User:      user,
 					Dir:       user,
-					Name:      date + " - " + tweet.ID + "-" + fmt.Sprint(id),
-					URL:       url + "?format=jpg&name=orig",
+					Name:      date + " - " + tweet.ID + "-" + fmt.Sprint(photo.ID),
+					URL:       photo.URL + "?format=jpg&name=orig",
 					TweetType: TweetTypePhoto,
 				}
 				d.GetInfo() <- tweetInfo

@@ -158,23 +158,24 @@ func getUserTweets(user string, amount int, getVideos bool, getPhotos bool, d do
 		}
 
 		if getPhotos && tweet.Videos == nil {
-			for id, url := range tweet.Photos {
-				fileType := path.Ext(url)
+			for _, photo := range tweet.Photos {
+				fileType := path.Ext(photo.URL)
+				url := ""
 				switch fileType {
 				case ".jpg":
-					url = url + "?format=jpg&name=orig"
+					url = photo.URL + "?format=jpg&name=orig"
 				case ".png":
-					url = url + "?format=png&name=orig"
+					url = photo.URL + "?format=png&name=orig"
 				case "":
-					log.Error().Msgf("got empty ext: %s", url)
+					log.Error().Msgf("got empty ext: %s", photo)
 				default:
-					url = url + "?name=orig"
+					url = photo.URL + "?name=orig"
 					log.Warn().Str("ext", fileType).Msg("unknow file type")
 				}
 				tweetInfo := downloader.TweetInfo{
 					User:      user,
 					Dir:       user,
-					Name:      date + " - " + tweet.ID + "-" + fmt.Sprint(id),
+					Name:      date + " - " + tweet.ID + "-" + fmt.Sprint(photo.ID),
 					URL:       url,
 					TweetType: downloader.TweetTypePhoto,
 				}
