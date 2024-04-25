@@ -23,6 +23,7 @@ type Config struct {
 
 type GlobalConfig struct {
 	TweetAmount *int  `mapstructure:"tweet_amount"`
+	WithReplies *bool `mapstructure:"with_replies"`
 	GetVideos   *bool `mapstructure:"get_videos"`
 	GetPhotos   *bool `mapstructure:"get_photos"`
 }
@@ -30,6 +31,7 @@ type GlobalConfig struct {
 type UserConfig struct {
 	UserName    *string `mapstructure:"username"`
 	TweetAmount *int    `mapstructure:"tweet_amount"`
+	WithReplies *bool   `mapstructure:"with_replies"`
 	GetVideos   *bool   `mapstructure:"get_videos"`
 	GetPhotos   *bool   `mapstructure:"get_photos"`
 }
@@ -61,6 +63,10 @@ func Load(path string) (Config, error) {
 	for _, user := range config.Users {
 		if user.TweetAmount == nil {
 			user.TweetAmount = config.Global.TweetAmount
+		}
+
+		if user.WithReplies == nil {
+			user.WithReplies = config.Global.WithReplies
 		}
 
 		if user.GetPhotos == nil {

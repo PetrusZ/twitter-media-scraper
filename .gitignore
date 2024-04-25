@@ -1,5 +1,6 @@
 out/
 test/
 .idea
+.DS_Store
 *.old
 twitter-media-scraper*
