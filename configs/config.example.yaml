@@ -2,13 +2,15 @@ log_level: info
 keep_running: true
 download_dir: out
 downloader_instance_num: 16
-cron: '0 0 3 * * *' # Seconds, Minutes, Hours, Day of month, Month, Day of week
+cron: "0 0 3 * * *" # Seconds, Minutes, Hours, Day of month, Month, Day of week
 global:
   get_videos: true
   get_photos: true
   tweet_amount: 100
+  with_replies: false
 users:
   - username: BBCWorld
     tweet_amount: 50
     get_videos: false
+    with_replies: true
   - username: wbpictures

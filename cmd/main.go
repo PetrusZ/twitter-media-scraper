@@ -53,7 +53,7 @@ func main() {
 
 		for _, user := range conf.Users {
 			if *user.UserName != "" {
-				err := getUserTweets(*user.UserName, *user.TweetAmount, *user.GetVideos, *user.GetPhotos, d)
+				err := getUserTweets(*user.UserName, *user.TweetAmount, *user.WithReplies, *user.GetVideos, *user.GetPhotos, d)
 				if err != nil {
 					log.Error().Err(err).Msg("")
 				}
@@ -129,11 +129,11 @@ func setLogLevel(logLevel string) {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339})
 }
 
-func getUserTweets(user string, amount int, getVideos bool, getPhotos bool, d downloader.Downloader) (err error) {
+func getUserTweets(user string, amount int, withReplies, getVideos, getPhotos bool, d downloader.Downloader) (err error) {
 	log.Debug().Msgf("Downloading user %s's video = %t, photos = %t", user, getVideos, getPhotos)
 
 	scraper := twitterscraper.New()
-	// scraper.WithDelay(60)
+	scraper.WithReplies(withReplies)
 	tweets := scraper.GetTweets(context.Background(), user, amount)
 
 	for tweet := range tweets {
